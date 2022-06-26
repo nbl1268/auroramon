@@ -25,7 +25,7 @@
 
 
 #ifdef __WXMSW__
-#include <windows.h>
+//#include <windows.h>
 //#include <wx/msw/registry.h>
 #else
 #include <termios.h>
