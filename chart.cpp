@@ -1029,7 +1029,7 @@ void GraphPanel::PlotGraphs(wxDC &dc, int height, int pass)
             else
             if(chart_page->graph[graph_num].style == gHATCH)
             {
-                wxBrush hatch_brush(colour, wxFDIAGONAL_HATCH);
+                wxBrush hatch_brush(colour, wxBRUSHSTYLE_FDIAGONAL_HATCH);
                 dc.SetBrush(hatch_brush);
                 dc.DrawPolygon(nx+3, points);
             }
