@@ -222,15 +222,15 @@ int SerialOpen()
 {//=============
     // Windows
 	int err =0;
-    char dev_name[30];
+    wxString dev_name;
     DCB dcbSerialParams = {0};
     COMMTIMEOUTS timeouts = {0};
 
-    strncpy0(dev_name, serial_port.mb_str(wxConvLocal), sizeof(dev_name));
-    if(dev_name[0] == 0)
+    dev_name = serial_port.mb_str(wxConvLocal);
+    if(dev_name.empty())
         return(-1);   // no serial port set
 
-    fd_serial = CreateFile(dev_name, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+    fd_serial = CreateFile(dev_name.fn_str(), GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 
     if(fd_serial == INVALID_HANDLE_VALUE)
     {
