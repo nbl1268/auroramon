@@ -601,6 +601,7 @@ class DlgSetTime: public wxDialog
     private:
         void OnButton(wxCommandEvent &event);
         void OnTimer(wxTimerEvent &event);
+        void UpdateData();
 
         wxTimer settime_timer;
         wxButton *button_OK;

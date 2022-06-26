@@ -692,6 +692,14 @@ DlgSetTime::DlgSetTime(wxWindow *parent)
 
 void DlgSetTime::OnTimer(wxTimerEvent& WXUNUSED(event))
 {//====================================================
+
+    UpdateData();
+
+}
+
+void DlgSetTime::UpdateData()
+{//====================================================
+
     wxDateTime datetime;
     time_t computer_time;
     time_t inverter_time;
@@ -728,10 +736,9 @@ void DlgSetTime::OnTimer(wxTimerEvent& WXUNUSED(event))
 
 void DlgSetTime::ShowDlg(int inv)
 {//==============================
-    wxTimerEvent null_event;
 
     inverter = inv;
-    OnTimer(null_event);
+    UpdateData();
     settime_timer.Start(250, wxTIMER_CONTINUOUS);
     QueueCommand(inv, cmdGetInvTime);
     inverters[inv].need_time_offset = 2;  // pending
