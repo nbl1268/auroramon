@@ -30,6 +30,7 @@
 #include <wx/progdlg.h>
 #include <wx/spinctrl.h>
 
+#pragma region Declarations
 
 // #define FLASH_MEMORY   // write to files less often
 
@@ -249,6 +250,9 @@ typedef struct {
 
 #define N_EXTRA_READINGS  8
 
+#pragma endregion
+
+
 class Mainframe: public wxFrame
 {//============================
     public:
@@ -420,6 +424,7 @@ class GraphPanel: public wxScrolledWindow
 };
 
 
+// TODO Review for multiple inverters
 class DlgSetup: public wxDialog
 {//============================
     public:
@@ -439,7 +444,7 @@ class DlgSetup: public wxDialog
     DECLARE_EVENT_TABLE()
 };
 
-
+// TODO Review for multiple inverters
 #define N_PANEL_GROUPS   2
 
 typedef struct {

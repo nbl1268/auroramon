@@ -20,12 +20,12 @@
 
 #include "auroramon.h"
 
-
 #define N_GLOBAL_STATES   102
 #define N_INVERTER_STATES  48
 #define N_DCDC_STATES      20
 #define N_ALARM_STATES     65
 
+#pragma region Declarations
 
 static const char *GlobalStates[N_GLOBAL_STATES] = {
 "Sending Parameters",
@@ -131,7 +131,6 @@ NULL,
 "Counting EEprom",		    // 100
 "Freeze"					// 101
 };
-
 
 static const char *InverterStates[N_INVERTER_STATES] = {
 "Stand By",                 // 0
@@ -293,16 +292,20 @@ const int message_range[5] = {
 static int keep_alarm_display = 0;
 static unsigned long time_last_alarm = 0;
 
-
 BEGIN_EVENT_TABLE(DlgAlarms, wxDialog)
 	EVT_BUTTON(-1, DlgAlarms::OnButton)
 END_EVENT_TABLE()
 
 DlgAlarms *dlg_alarms = NULL;
 
-
 static const wxString labels[5] = {_T("Global state"), _T("Inverter state"), _T("Chnl 1 DC/DC"), _T("Chnl 2 DC/DC"), _T("Alarm state")};
 
+#pragma endregion
+
+
+// TODO fix form size to show information for multiple inverters
+// FUTURE add scrollbar to support more then 2 inverters
+// https://forums.wxwidgets.org/viewtopic.php?t=44435
 DlgAlarms::DlgAlarms(wxWindow *parent)
     : wxDialog(parent, -1, _T("Inverter Status"), wxPoint(0, 116), wxSize(320,280+DLG_HX))
 {//====================================
@@ -333,7 +336,7 @@ void DlgAlarms::Layout(int which_inverter)
     int y;
     int ix;
     int inv;
-    int show[2];
+    int show[2] = { 0,0 };
 
     if(inverter_address[1] == 0)
     {
@@ -365,8 +368,9 @@ void DlgAlarms::Layout(int which_inverter)
         inverter_name[inv]->Show(true);
     }
 
+    // Set form size for number of inverters configured
     if(show[0] && show[1])
-        SetSize(0, 116, 320, 119+DLG_HX);
+        SetSize(0, 116, 320, 219+DLG_HX);
     else
         SetSize(0, 116, 320, 114+DLG_HX);
 

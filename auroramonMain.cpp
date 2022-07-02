@@ -18,6 +18,37 @@
  *               <http://www.gnu.org/licenses/>.                           *
  ***************************************************************************/
 
+#pragma region TODO
+ // TODO My list of 'Fixes' and 'Enhancements' to Auroramon v1.07 code base
+ // http://auroramonitor.sourceforge.net/
+ // https://sourceforge.net/projects/auroramonitor/files/auroramon-1.07/
+ // 
+ // Planned changes (29 May 2022)
+ // - Error Handling
+ // - capture in log and handle so program continues rather than crashing out
+ // - Improve Inverter status message form
+ //   - expand status panel fields when there are two inverters configured 
+ //   - fix show it can be hidden if needed (press F4 seems to hide it - need to check with live data)
+ // - Move 'extra fields' below the respective inverter data
+ //
+ // - check why extra field in status panel for RISO isnt showing for both inverters
+ // 
+ // Create Windows Installer Package (update to existing installer... CMake??)
+ //
+ // FUTURE items
+ // - Message Log / List
+ // - show raw and processed messages
+ // - set default data path to %LOCALAPPDATA% eg C:\Users\{user}\Appdata\Local
+ //       variable => data_dir
+ //
+#pragma endregion
+
+#pragma region v1.08
+ // List of changes contained in v1.08
+
+#pragma endregion
+
+
 #include <wx/aboutdlg.h>
 #include <wx/generic/aboutdlgg.h>
 #include <wx/filename.h>
@@ -31,7 +62,7 @@
 
 #include "auroramon.h"
 
-
+#pragma region Declarations
 
 DECLARE_EVENT_TYPE(wxEVT_MY_EVENT, -1)
 DEFINE_EVENT_TYPE(wxEVT_MY_EVENT)
@@ -96,13 +127,14 @@ wxString date_logchange = wxEmptyString;
 char ymd_energy[12];
 char ymd_alarm[12];
 
-
+// TODO review to support more than 2 inverters
 INVERTER inverters[N_INV];
-
 int inverter_address[N_INV] = {2, 0};
 
 int option_date_format;
 //char current_timestring[N_INV][10];
+
+#pragma endregion
 
 
 PowerMeter::PowerMeter(wxWindow *parent)
@@ -1610,6 +1642,8 @@ Mainframe::Mainframe(wxFrame *frame, const wxString& title)
     pulsetimer.SetOwner(this->GetEventHandler(), idPulseTimer);
     logstatus_timer.SetOwner(this->GetEventHandler(), idLogStatusTimer);
 
+    // setup size of the status_panel
+    // TODO make it relative to number of inverters configured
     status_panel = new wxPanel(this, -1, wxDefaultPosition, wxSize(100, 52), wxSUNKEN_BORDER);
     graph_panel = new GraphPanel(this, wxDefaultPosition, wxSize(100,100));
     wxBoxSizer *frame_sizer = new wxBoxSizer(wxVERTICAL);
@@ -1618,7 +1652,7 @@ Mainframe::Mainframe(wxFrame *frame, const wxString& title)
     SetSizer(frame_sizer);
 
     MakeStatusPanel();
-	Maximize();
+	// Maximize();
 
     dlg_setup = new DlgSetup(this);
     dlg_location = new DlgLocation(this);

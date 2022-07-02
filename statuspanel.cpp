@@ -24,6 +24,7 @@
 #include <wx/sizer.h>
 #include "auroramon.h"
 
+#pragma region Declarations
 
 wxFont font_big(24, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD);
 wxFont font_medium(19, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD);
@@ -36,7 +37,7 @@ wxFont font_medium(19, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD
 #define HT_PW0  34
 #endif
 
-
+#pragma endregion
 
 void DrawStatusPulse(int pulse)
 {//============================
@@ -351,7 +352,8 @@ void Mainframe::SetupStatusPanel(int control)
     }
 }
 
-
+// TODO review layout, re-arrange so that inverter 2 readings are shown below (inverter 1 readings) rather than to the right side
+// FUTURE Maybe make as scrollable field to allow for multiple inverters
 void Mainframe::MakeStatusPanel(void)
 {//==================================
     int ix;
@@ -363,10 +365,12 @@ void Mainframe::MakeStatusPanel(void)
 
     for(inv=0; inv<2; inv++)
     {
+        // Inverter output and name
         txt_power[inv] = new wxTextCtrl(status_panel, -1, _T(""), wxPoint(0,1), wxSize(82,HT_PW0), TE_BIG | wxTE_READONLY | wxTE_CENTRE);
         txt_power[inv]->SetDefaultStyle(wxTextAttr(wxNullColour, wxNullColour, font_medium));
         txt_static[inv][0] = new wxStaticText(status_panel, -1, _T(""), wxPoint(0, 33));
 
+        // adds controls to 'status_panel' show key values from inverters
         txt_power1[inv] = new wxTextCtrl(status_panel, -1, _T(""), wxPoint(0, 1), wxSize(46, 20), wxTE_READONLY | wxTE_CENTRE);
         txt_power2[inv] = new wxTextCtrl(status_panel, -1, _T(""), wxPoint(0, 23), wxSize(46, 20), wxTE_READONLY | wxTE_CENTRE);
         txt_volts1[inv] = new wxTextCtrl(status_panel, -1, _T(""), wxPoint(0, 1), wxSize(40, 20), wxTE_READONLY | wxTE_CENTRE);
@@ -376,6 +380,7 @@ void Mainframe::MakeStatusPanel(void)
         txt_efficiency[inv] = new wxTextCtrl(status_panel, -1, _T(""), wxPoint(0, 1), wxSize(40, 20), wxTE_READONLY | wxTE_CENTRE);
         txt_temperature[inv] = new wxTextCtrl(status_panel, -1, _T(""), wxPoint(0, 23), wxSize(40, 20), wxTE_READONLY | wxTE_CENTRE);
 
+        // Adds labels for respective fields
         txt_static[inv][2] = new wxStaticText(status_panel, -1, _T("W"), wxPoint(0, 4));
         txt_static[inv][3] = new wxStaticText(status_panel, -1, _T("W"), wxPoint(0, 26));
         txt_static[inv][4] = new wxStaticText(status_panel, -1, _T("V"), wxPoint(0, 4));
@@ -385,6 +390,7 @@ void Mainframe::MakeStatusPanel(void)
         txt_static[inv][8] = new wxStaticText(status_panel, -1, _T("%"), wxPoint(0, 4));
         txt_static[inv][9] = new wxStaticText(status_panel, -1, _T("deg"), wxPoint(0, 26));
 
+        // adds Inverter Energy Summary
         txt_static[inv][10] = new wxStaticText(status_panel, -1, _T("kWh"), wxPoint(0, 4));
         for(ix=0; ix<6; ix++)
         {
@@ -396,6 +402,7 @@ void Mainframe::MakeStatusPanel(void)
             txt_static[inv][ix+11] = new wxStaticText(status_panel, -1, energy_names[ix], wxPoint(0, y+3));
        }
 
+        // adds controls for defined extra readings
         for(ix=0; ix<N_EXTRA_READINGS; ix++)
         {
             y = 1;

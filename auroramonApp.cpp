@@ -33,18 +33,14 @@ class auroraApp : public wxApp
 IMPLEMENT_APP(auroraApp);
 
 wxString path_home;
-
 wxString serial_port;
-
-
-
 wxString data_dir = wxGetCwd();
 wxString data_system_dir = data_dir;
 wxString data_year_dir = data_dir;
 wxString data_year_dir2 = data_dir;
 wxString path_retrieve;
 
-
+// NOTE reads from 'aurora.ini' which is located in '%USERPROFILE%\AppData\Roaming' eg %APPDATA% folder
 void ConfigInit()
 {
     int ix;
@@ -52,7 +48,7 @@ void ConfigInit()
     double *e;
     char buf[100];
     wxString string;
-    wxFileConfig *pConfig = new wxFileConfig(_T("aurora"));
+    wxFileConfig *pConfig = new wxFileConfig(_T("aurora"));     // this creates new 'default' config which has data path within... 
 	wxFileConfig::Set(pConfig);
 #ifdef __WXMSW__
 	pConfig->Read(_T("/data"), &data_dir, path_home+_T("\\aurora"));
