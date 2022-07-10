@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Express 15 for Windows Desktop
-VisualStudioVersion = 15.0.28307.1500
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.32602.291
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "auroramon", "auroramon.vcxproj", "{BFA9C3A1-A1C5-43F5-857D-57B8C80D72B6}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "auroramon-setup", "..\auroramon-setup\auroramon-setup.vdproj", "{9A9B1359-765E-4258-AADB-7B0CCBF31A6A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,14 @@ Global
 		{BFA9C3A1-A1C5-43F5-857D-57B8C80D72B6}.Release|x64.Build.0 = Release|x64
 		{BFA9C3A1-A1C5-43F5-857D-57B8C80D72B6}.Release|x86.ActiveCfg = Release|Win32
 		{BFA9C3A1-A1C5-43F5-857D-57B8C80D72B6}.Release|x86.Build.0 = Release|Win32
+		{9A9B1359-765E-4258-AADB-7B0CCBF31A6A}.Debug DLL|x64.ActiveCfg = Debug
+		{9A9B1359-765E-4258-AADB-7B0CCBF31A6A}.Debug DLL|x86.ActiveCfg = Debug
+		{9A9B1359-765E-4258-AADB-7B0CCBF31A6A}.Debug|x64.ActiveCfg = Debug
+		{9A9B1359-765E-4258-AADB-7B0CCBF31A6A}.Debug|x86.ActiveCfg = Debug
+		{9A9B1359-765E-4258-AADB-7B0CCBF31A6A}.Release DLL|x64.ActiveCfg = Release
+		{9A9B1359-765E-4258-AADB-7B0CCBF31A6A}.Release DLL|x86.ActiveCfg = Release
+		{9A9B1359-765E-4258-AADB-7B0CCBF31A6A}.Release|x64.ActiveCfg = Release
+		{9A9B1359-765E-4258-AADB-7B0CCBF31A6A}.Release|x86.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
