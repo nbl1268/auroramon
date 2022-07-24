@@ -5,3 +5,5 @@
 /.vs/auroramon/v16
 /x64/Debug
 /x64/Release
+/Win32/Debug
+/Win32/Release

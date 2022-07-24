@@ -26,9 +26,8 @@
  // Planned changes (29 May 2022)
  // - Error Handling
  // - capture in log and handle so program continues rather than crashing out
- // - Improve Inverter status message form
- //   - expand status panel fields when there are two inverters configured 
- //   - fix show it can be hidden if needed (press F4 seems to hide it - need to check with live data)
+  // - Improve Inverter status message form
+ //   - fix so it can be hidden if needed (press F4 seems to hide it - need to check with live data)
  // - Move 'extra fields' below the respective inverter data
  //
  // - check why extra field in status panel for RISO isnt showing for both inverters
@@ -45,6 +44,9 @@
 
 #pragma region v1.08
  // List of changes contained in v1.08
+ // 19/7/2022
+ // - Improve Inverter status message form
+ //   - expand status panel field size (height) when there are two inverters configured 
 
 #pragma endregion
 
@@ -1644,7 +1646,11 @@ Mainframe::Mainframe(wxFrame *frame, const wxString& title)
 
     // setup size of the status_panel
     // TODO make it relative to number of inverters configured
+    // the wxSize(x,y) controls the size of the status panel - need to check number of inverters then set accordingly
+    // status_panel = new wxPanel(this, -1, wxDefaultPosition, wxSize(100, 52), wxSUNKEN_BORDER);
+    // if(inverter_address[1] == 0) {}
     status_panel = new wxPanel(this, -1, wxDefaultPosition, wxSize(100, 52), wxSUNKEN_BORDER);
+
     graph_panel = new GraphPanel(this, wxDefaultPosition, wxSize(100,100));
     wxBoxSizer *frame_sizer = new wxBoxSizer(wxVERTICAL);
     frame_sizer->Add(graph_panel, 1, wxEXPAND);

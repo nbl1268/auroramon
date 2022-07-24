@@ -341,7 +341,8 @@ void DlgAlarms::Layout(int which_inverter)
     if(inverter_address[1] == 0)
     {
         // only one inverter
-        SetSize(0, 116, 320, 86+DLG_HX);
+        // SetSize(0, 116, 320, 86+DLG_HX);
+        SetSize(0, 116, 320, 106+DLG_HX);
         y =4;
         for(ix=0; ix<5; ix++)
         {
@@ -372,7 +373,7 @@ void DlgAlarms::Layout(int which_inverter)
     if(show[0] && show[1])
         SetSize(0, 116, 320, 219+DLG_HX);
     else
-        SetSize(0, 116, 320, 114+DLG_HX);
+        SetSize(0, 116, 320, 106+DLG_HX);
 
     y = 0;
     inverter_name[0]->SetSize(wxDefaultCoord, y, wxDefaultCoord, wxDefaultCoord);
