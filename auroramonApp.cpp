@@ -29,7 +29,6 @@ class auroraApp : public wxApp
         int OnExit();
 };
 
-
 IMPLEMENT_APP(auroraApp);
 
 wxString path_home;
@@ -40,7 +39,9 @@ wxString data_year_dir = data_dir;
 wxString data_year_dir2 = data_dir;
 wxString path_retrieve;
 
+
 // NOTE reads from 'aurora.ini' which is located in '%USERPROFILE%\AppData\Roaming' eg %APPDATA% folder
+
 void ConfigInit()
 {
     int ix;
@@ -106,7 +107,6 @@ void ConfigInit()
     }
 
 }  // end of ConfigInit
-
 
 void ConfigSave(int control)
 {
@@ -208,7 +208,6 @@ int auroraApp::OnExit()
 	ConfigSave(0);
 	return(0);
 }
-
 
 void strncpy0(char *to, const char* from, int size)
 {

@@ -25,7 +25,6 @@
 #include <wx/filename.h>
 #include "auroramon.h"
 
-
 extern void MakeInverterNames(int control);
 extern wxArrayString InverterNames;
 
@@ -67,7 +66,6 @@ DlgSetup::DlgSetup(wxWindow *parent)
     button_OK = new wxButton(this, dlgOK, _T("OK"), wxPoint(130,y));
     button_OK->SetDefault();
     button_Cancel = new wxButton(this, dlgCancel, _T("Cancel"), wxPoint(220,y));
-
 }
 
 void DlgSetup::ShowDlg()
@@ -88,7 +86,6 @@ void DlgSetup::ShowDlg()
     t_date_format->SetSelection(option_date_format);
     ShowModal();
 }
-
 
 void DlgSetup::OnButton(wxCommandEvent &event)
 {//===========================================
@@ -132,7 +129,6 @@ void DlgSetup::OnButton(wxCommandEvent &event)
     Show(false);
 }
 
-
 //=======================================================================================================================
 
 
@@ -144,7 +140,6 @@ BEGIN_EVENT_TABLE(DlgLocation, wxDialog)
 	EVT_BUTTON(dlgOK, DlgLocation::OnButton)
 	EVT_BUTTON(dlgCancel, DlgLocation::OnButton)
 END_EVENT_TABLE()
-
 
 wxString degrees_to_string(double degrees)
 {//=======================================
@@ -251,7 +246,6 @@ void DlgLocation::ShowDlg()
     ShowModal();
 }
 
-
 void DlgLocation::OnButton(wxCommandEvent &event)
 {//==============================================
     int id;
@@ -303,7 +297,6 @@ void DlgLocation::OnButton(wxCommandEvent &event)
     Show(false);
 }
 
-
 //=======================================================================================================================
 
 
@@ -316,10 +309,8 @@ BEGIN_EVENT_TABLE(DlgInverter, wxDialog)
 	EVT_BUTTON(dlgCancel, DlgInverter::OnButton)
 END_EVENT_TABLE()
 
-
 static wxString inverter_retrieve_choices[] = {
     _T("no"), _T("5 minute data"), _T("10 second data") };
-
 
 DlgInverter::DlgInverter(wxWindow *parent)
     : wxDialog(parent, -1, _T("Inverter Settings"), wxDefaultPosition, wxSize(324,200+DLG_HX))
@@ -343,7 +334,6 @@ void DlgInverter::ShowDlg(int inv)
     ShowModal();
 }
 
-
 void DlgInverter::OnButton(wxCommandEvent &event)
 {//==============================================
     int id;
@@ -356,7 +346,6 @@ void DlgInverter::OnButton(wxCommandEvent &event)
     Show(false);
 }
 
-
 //=======================================================================================================================
 
 
@@ -368,7 +357,6 @@ BEGIN_EVENT_TABLE(DlgHistogram, wxDialog)
 	EVT_BUTTON(dlgOK, DlgHistogram::OnButton)
 	EVT_BUTTON(dlgCancel, DlgHistogram::OnButton)
 END_EVENT_TABLE()
-
 
 extern wxString BackColours[N_BACK_COLOURS];
 double histogram_max;
@@ -403,7 +391,6 @@ void DlgHistogram::ShowDlg()
      ShowModal();
 }
 
-
 void DlgHistogram::OnButton(wxCommandEvent &event)
 {//=============================================
     int id;
@@ -420,8 +407,6 @@ void DlgHistogram::OnButton(wxCommandEvent &event)
     Show(false);
 }
 
-
-
 //=======================================================================================================================
 
 
@@ -435,7 +420,6 @@ BEGIN_EVENT_TABLE(DlgRetrieveEnergy, wxDialog)
 END_EVENT_TABLE()
 
 wxProgressDialog *progress_retrieval = NULL;
-
 
 DlgRetrieveEnergy::DlgRetrieveEnergy(wxWindow *parent)
     : wxDialog(parent, -1, wxEmptyString, wxDefaultPosition, wxSize(470,200+DLG_HX))
@@ -462,7 +446,6 @@ DlgRetrieveEnergy::DlgRetrieveEnergy(wxWindow *parent)
     option_verbose = 0;
     option_pvoutput = 0;
 }
-
 
 void DlgRetrieveEnergy::ShowDlg(int inv, int type)
 {//===============================================
@@ -515,7 +498,6 @@ void DlgRetrieveEnergy::ShowDlg(int inv, int type)
     ShowModal();
 }
 
-
 void DlgRetrieveEnergy::OnButton(wxCommandEvent &event)
 {//=============================================
     wxString path;
@@ -556,9 +538,6 @@ void DlgRetrieveEnergy::OnButton(wxCommandEvent &event)
     Show(false);
 }
 
-
-
-
 //=======================================================================================================================
 
 
@@ -571,9 +550,7 @@ BEGIN_EVENT_TABLE(DlgPvoutput, wxDialog)
 	EVT_BUTTON(dlgCancel, DlgPvoutput::OnButton)
 END_EVENT_TABLE()
 
-
 PVOUTPUT pvoutput;
-
 wxString pvoutput_choices[4] = {_T("Off"), _T("5 minutes"), _T("10 minutes"), _T("15 minutes")};
 
 DlgPvoutput::DlgPvoutput(wxWindow *parent)
@@ -602,7 +579,6 @@ DlgPvoutput::DlgPvoutput(wxWindow *parent)
     button_Cancel = new wxButton(this, dlgCancel, _T("Cancel"), wxPoint(370,y));
 }
 
-
 void DlgPvoutput::ShowDlg()
 {//========================
     t_url->ChangeValue(pvoutput.url);
@@ -614,7 +590,6 @@ void DlgPvoutput::ShowDlg()
     t_temperature->SetValue(pvoutput.live_updates & PVO_TEMPERATURE);
     ShowModal();
 }
-
 
 void DlgPvoutput::OnButton(wxCommandEvent &event)
 {//==============================================
@@ -639,8 +614,6 @@ void DlgPvoutput::OnButton(wxCommandEvent &event)
     Show(false);
 }
 
-
-
 //=======================================================================================================================
 
 
@@ -653,7 +626,6 @@ BEGIN_EVENT_TABLE(DlgSetTime, wxDialog)
 	EVT_BUTTON(dlgCancel, DlgSetTime::OnButton)
     EVT_TIMER(idSetTimeTimer, DlgSetTime::OnTimer)
 END_EVENT_TABLE()
-
 
 DlgSetTime::DlgSetTime(wxWindow *parent)
     : wxDialog(parent, -1, _T("Set Time"), wxDefaultPosition, wxSize(470,220+DLG_HX))
@@ -687,8 +659,6 @@ DlgSetTime::DlgSetTime(wxWindow *parent)
     settime_timer.SetOwner(this->GetEventHandler(), idSetTimeTimer);
 
 }
-
-
 
 void DlgSetTime::OnTimer(wxTimerEvent& WXUNUSED(event))
 {//====================================================
@@ -733,7 +703,6 @@ void DlgSetTime::UpdateData()
     }
 }
 
-
 void DlgSetTime::ShowDlg(int inv)
 {//==============================
 
@@ -744,7 +713,6 @@ void DlgSetTime::ShowDlg(int inv)
     inverters[inv].need_time_offset = 2;  // pending
     ShowModal();
 }
-
 
 void DlgSetTime::OnButton(wxCommandEvent &event)
 {//=============================================
@@ -787,3 +755,5 @@ void DlgSetTime::OnButton(wxCommandEvent &event)
     settime_timer.Stop();
     Show(false);
 }
+
+//=======================================================================================================================

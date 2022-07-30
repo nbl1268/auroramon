@@ -44,9 +44,11 @@
 
 #pragma region v1.08
  // List of changes contained in v1.08
+ // 24/07/2022
+ // 
  // 19/7/2022
  // - Improve Inverter status message form
- //   - expand status panel field size (height) when there are two inverters configured 
+ //   - expanded inverter status panel field size (height) when there are two inverters configured 
 
 #pragma endregion
 
@@ -649,13 +651,17 @@ void OpenLogFiles(int create, int control)
     if(date_logchange != date_ymd_string)
     {
         // change to a new com_log
-wxRemoveFile(data_dir+_T("/com_log.txt"));   // location used by previous version
-wxRemoveFile(data_dir+_T("/com_log_yesterday.txt"));
+        // 30/July/2022 - these two lines are not needed...
+        // wxRemoveFile(data_dir+_T("/com_log.txt"));   // location used by previous version
+        // wxRemoveFile(data_dir+_T("/com_log_yesterday.txt"));
+
+        // back up com_log, overwrite 'com_log_yesterday' if exists
         fname_log = data_dir+_T("/system/com_log.txt");
         if(wxFileExists(fname_log))
         {
             wxRenameFile(fname_log, data_dir+_T("/system/com_log_yesterday.txt"), true);
         }
+        // back up message_log, overwrite 'message_log_yesterday' if exists
         fname_log = data_dir+_T("/system/message_log.txt");
         if(wxFileExists(fname_log))
         {
@@ -1702,7 +1708,6 @@ Mainframe::Mainframe(wxFrame *frame, const wxString& title)
     SendCommand(0,5);  // start the inverter commands
 }
 
-
 void Mainframe::OnStartupTimer(wxTimerEvent& WXUNUSED(event))
 {//===========================================================
 	graph_panel->enable_draw = 1;
@@ -1710,9 +1715,6 @@ void Mainframe::OnStartupTimer(wxTimerEvent& WXUNUSED(event))
 //	my_event.SetId(idRefreshGraph);
 //  wxPostEvent(graph_panel->GetEventHandler(), my_event);
 }
-
-
-
 
 Mainframe::~Mainframe()
 {//====================
@@ -1731,18 +1733,18 @@ void Mainframe::OnClose(wxCloseEvent& WXUNUSED(event))
     Destroy();
 }
 
-
-
 void Mainframe::OnAbout()
 {
+    // https://docs.wxwidgets.org/3.0/classwx_about_dialog_info.html
     wxAboutDialogInfo info;
     info.SetName(_("Aurora Monitor"));
-    info.SetVersion(_("1.07"));
+    info.SetVersion(_("1.08"));
     info.SetDescription(_("Receives and displays data from up to 2 Aurora power inverters.\n"));
     info.SetCopyright(_T("(C) 2012 Jonathan Duddington <jonsd@users.sourceforge.net>"));
+    info.AddDeveloper(wxT("2012 Jonathan Duddington"));
+    info.AddDeveloper(wxT("\n2022 nbl1268"));
     info.SetLicence(_T("GNU GENERAL PUBLIC LICENSE Version 3\n\nhttp://www.gnu.org/licenses/gpl.html"));
+    info.SetWebSite(wxT("https://github.com/nbl1268"));
 
     wxAboutBox(info);
-
-
 }

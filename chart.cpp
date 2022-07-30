@@ -28,13 +28,10 @@ wxFont Font_GraphDate(24, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_B
 wxFont Font_ChartName(16, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
 wxFont Font_SunElevation(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD);
 
-
 CHART_PAGE chart_pages[N_PAGES];
 
 DATAREC *graph_data[N_INV];
 unsigned short *dsp_data[N_INV][N_DSP];
-
-
 
 char *ns[2] = {NULL, NULL};
 unsigned short *points_vt1[2] = {NULL, NULL};
@@ -54,6 +51,11 @@ static int graph_date_width = 0;
 const double range_adjust[11] = {0.125, 0.1768, 0.25, 0.3536, 0.5, 0.7071, 1.0, 1.4142, 2.0, 2.8284, 4.0};
 
 #define CLIPPING_WIDTH 8
+
+
+// Done 24/07/2022 - fix form size to show information for all parameters shown on chart (max 5)
+// TODO - set form initial location to top right of parent form
+
 
 GraphPanel::GraphPanel(wxWindow *parent, const wxPoint& pos, const wxSize &size):
     wxScrolledWindow(parent,-1,pos,size,wxSUNKEN_BORDER | wxHSCROLL)
@@ -80,8 +82,6 @@ GraphPanel::GraphPanel(wxWindow *parent, const wxPoint& pos, const wxSize &size)
     EnableScrolling(false, false);
 }  //  end of GraphPanel::GraphPanel
 
-
-
 void GraphPanel::SetColours(int white)
 {//===================================
     if(white)
@@ -103,8 +103,6 @@ void GraphPanel::SetColours(int white)
     SetBackgroundColour(colour_backg);
 }
 
-
-
 DlgCoords::DlgCoords(wxWindow *parent)
     : wxDialog(parent, -1, _T("Coords"), wxPoint(0, 116), wxSize(320,280+DLG_HX))
 {//====================================
@@ -124,7 +122,6 @@ DlgCoords::DlgCoords(wxWindow *parent)
     }
 }
 
-
 void DlgCoords::ShowDlg(CHART_PAGE *chart_page, int period)
 {//========================================================
     int graph_num;
@@ -143,17 +140,28 @@ void DlgCoords::ShowDlg(CHART_PAGE *chart_page, int period)
         period = prev_period;
     prev_period = period;
 
+    
+    // TODO - get exApp location and size - use to set initial location of this form
+    // wxFileConfig* pConfig = new wxFileConfig("SlideComposer");
+    int fx, fy, fw, fh;
+    GetClientSize(&fw, &fh);
+    GetSize(&fw, &fh);
+    GetPosition(&fx, &fy);
+    // Move(x, y);
+    // SetClientSize(w, h);
+
     if(IsShown() == false)
     {
 #ifdef __WXMSW__
-        SetSize(0, 116, 150, 100+DLG_HX);
+        // 24/7/2022 - increase form height to allow for time + 5 (max) data fields
+        // SetSize(0, 116, 150, 100+DLG_HX);
+        SetSize(0, 116, 150, 110 + DLG_HX);
 #else
         SetSize(0, 116, 150, 96+DLG_HX);
 #endif
     }
 
     t_time->SetLabel(wxString::Format(_T("%d:%.2d:%.2d"), period/360, (period/6)%60, (period%6)*10));
-
 
     Show(true);
 
@@ -282,7 +290,6 @@ void DlgCoords::ShowDlg(CHART_PAGE *chart_page, int period)
     }
 }
 
-
 void GraphPanel::OnMouse(wxMouseEvent& event)
 {//==========================================
     long x, y;
@@ -324,8 +331,6 @@ void GraphPanel::OnMouse(wxMouseEvent& event)
     }
 }
 
-
-
 void GraphPanel::SetMode(int mode)
 {//===============================
     if(mode >= 0)
@@ -348,7 +353,6 @@ void GraphPanel::SetMode(int mode)
     Refresh();
 }
 
-
 void GraphPanel::ResetGraph(void)
 {//==============================
     int page;
@@ -367,8 +371,6 @@ void GraphPanel::ShowPage(int pagenum)
     SetColours(chart_pages[page].flags & gBACK_COLOUR);
     Refresh();
 }
-
-
 
 void GraphPanel::SetExtent()
 {//=========================
@@ -415,13 +417,11 @@ void GraphPanel::SetExtent()
     }
 }
 
-
 void GraphPanel::OnKey(wxKeyEvent& event)
 {//=======================================
     if(OnKey2(event) < 0)
         event.Skip();
 }
-
 
 int GraphPanel::OnKey2(wxKeyEvent& event)
 {//=====================================
@@ -675,7 +675,6 @@ int GraphPanel::OnKey2(wxKeyEvent& event)
 	return(0);
 }
 
-
 int GetYGrads(int range)
 {
     int ix;
@@ -689,9 +688,6 @@ int GetYGrads(int range)
     }
     return(2000);
 }
-
-
-
 
 static void AllocGraphPoints(int width)
 {//====================================
@@ -718,7 +714,6 @@ static void AllocGraphPoints(int width)
         }
     }
 }
-
 
 void GraphPanel::PlotGraphs(wxDC &dc, int height, int pass)
 {//========================================================
@@ -1082,8 +1077,6 @@ void GraphPanel::PlotGraphs(wxDC &dc, int height, int pass)
     }
 }  // end of PlotGraphs
 
-
-
 void GraphPanel::OnDraw(wxDC &dc)
 {//=============================
     int inv=0;
@@ -1416,8 +1409,6 @@ void GraphPanel::OnDraw(wxDC &dc)
     }
 }  // end of GraphPanel::OnDraw
 
-
-
 void GraphPanel::AddPoint(int inverter, int time, DATAREC *datarec, int control)
 {//=============================================================================
     // control:  bit 0  update energy total
@@ -1470,8 +1461,6 @@ void GraphPanel::AddPoint(int inverter, int time, DATAREC *datarec, int control)
     }
 }  // end of AddPoint
 
-
-
 void GraphPanel::NewDay(void)
 {//==========================
     int inv;
@@ -1502,7 +1491,6 @@ void GraphPanel::NewDay(void)
         }
     }
 }
-
 
 typedef struct {
     float power[3];
@@ -1894,7 +1882,9 @@ int GraphPanel::ReadEnergyFile(int inv, wxString filename, int control, const ch
                 if(p[ix] != 0xffff)
                 {
                     gap = ix - prev_ix;
-                    if((prev_ix > 0) & (gap > 1) && (gap < MAX_GAP))
+                    // TODO Warning	lnt - logical - bitwise - mismatch	Using bitwise '&' when logical '&&' was probably intended.
+                    // if((prev_ix > 0) & (gap > 1) && (gap < MAX_GAP))
+                    if ((prev_ix > 0) && (gap > 1) && (gap < MAX_GAP))
                     {
                         diff = (double)(p[ix] - p[prev_ix]) / gap;
                         for(j=1; j < gap; j++)
@@ -1995,8 +1985,6 @@ int GraphPanel::ReadEnergyFile(int inv, wxString filename, int control, const ch
     return(0);
 }
 
-
-
 int ConvertLogBinary(wxString fname)
 {//=================================
     FILE *f_in;
@@ -2060,7 +2048,6 @@ int ConvertLogBinary(wxString fname)
     return(0);
 }  // end of ReadEnergyFile
 
-
 int SavePvoutput(int inv)
 {//======================
 // Save the day's data for export to www.pvoutput.org
@@ -2095,7 +2082,6 @@ int SavePvoutput(int inv)
     fclose(f);
     return(0);
 }
-
 
 void InitCharts()
 {//==============

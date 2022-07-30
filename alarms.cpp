@@ -303,9 +303,11 @@ static const wxString labels[5] = {_T("Global state"), _T("Inverter state"), _T(
 #pragma endregion
 
 
-// TODO fix form size to show information for multiple inverters
+// Done 19/07/2022 - fix form size to show information for multiple inverters
 // FUTURE add scrollbar to support more then 2 inverters
 // https://forums.wxwidgets.org/viewtopic.php?t=44435
+
+
 DlgAlarms::DlgAlarms(wxWindow *parent)
     : wxDialog(parent, -1, _T("Inverter Status"), wxPoint(0, 116), wxSize(320,280+DLG_HX))
 {//====================================
@@ -327,7 +329,6 @@ DlgAlarms::DlgAlarms(wxWindow *parent)
         }
     }
 }
-
 
 void DlgAlarms::Layout(int which_inverter)
 {//=======================================
@@ -424,7 +425,6 @@ void DlgAlarms::Layout(int which_inverter)
     }
 }
 
-
 void DlgAlarms::Close(void)
 {//========================
     keep_alarm_display = 0;
@@ -444,8 +444,6 @@ void DlgAlarms::OnButton(wxCommandEvent &event)
     }
     Close();
 }
-
-
 
 void DisplayState(int inv)
 {//=======================
@@ -570,7 +568,6 @@ void GotInverterStatus(int inv)
     }
     prev_alarm_state[inv] = alarm;
 
-
     if((inverters[0].alarm == 0) && (inverters[1].alarm == 0))
     {
         if(dlg_alarms->IsShown())
@@ -597,7 +594,6 @@ void GotInverterStatus(int inv)
     }
 }
 
-
 void ShowInverterStatus()
 {//======================
     dlg_alarms->Layout(3);
@@ -607,7 +603,6 @@ void ShowInverterStatus()
     keep_alarm_display = 1;  // don't remove the display automatically
     dlg_alarms->Show(true);
 }
-
 
 void PruneAlarmFile(int inv)
 {//=========================
