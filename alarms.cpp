@@ -20,12 +20,12 @@
 
 #include "auroramon.h"
 
+#pragma region Declarations
+
 #define N_GLOBAL_STATES   102
 #define N_INVERTER_STATES  48
 #define N_DCDC_STATES      20
 #define N_ALARM_STATES     65
-
-#pragma region Declarations
 
 static const char *GlobalStates[N_GLOBAL_STATES] = {
 "Sending Parameters",
@@ -300,16 +300,28 @@ DlgAlarms *dlg_alarms = NULL;
 
 static const wxString labels[5] = {_T("Global state"), _T("Inverter state"), _T("Chnl 1 DC/DC"), _T("Chnl 2 DC/DC"), _T("Alarm state")};
 
+// Main form Location
+int dlg_alarms_ParentPosX = 0;
+int dlg_alarms_ParentPosY = 0;
+
+// form Location
+int dlg_alarms_PosX = 0;
+int dlg_alarms_PosY = 116;
+//int dlg_alarms_width = 320;
+//int dlg_alarms_height = 106;   // per inverter + DLG header eg 27
+
 #pragma endregion
 
 
-// Done 19/07/2022 - fix form size to show information for multiple inverters
+// Done 31/07/2022 - positioned form top left of Main form
+// Done 19/07/2022 - fixed form size to show information for multiple inverters
 // FUTURE add scrollbar to support more then 2 inverters
 // https://forums.wxwidgets.org/viewtopic.php?t=44435
 
 
 DlgAlarms::DlgAlarms(wxWindow *parent)
-    : wxDialog(parent, -1, _T("Inverter Status"), wxPoint(0, 116), wxSize(320,280+DLG_HX))
+    // : wxDialog(parent, -1, _T("Inverter Status"), wxPoint(0, 116), wxSize(320,280+DLG_HX))
+    : wxDialog(parent, -1, _T("Inverter Status"), wxPoint(dlg_alarms_PosX, dlg_alarms_PosY), wxSize(dlg_alarms_width, dlg_alarms_height + DLG_HX))
 {//====================================
     int x, y;
     int inv;
@@ -342,8 +354,9 @@ void DlgAlarms::Layout(int which_inverter)
     if(inverter_address[1] == 0)
     {
         // only one inverter
+        // SetSize(x, y, w, h)
         // SetSize(0, 116, 320, 86+DLG_HX);
-        SetSize(0, 116, 320, 106+DLG_HX);
+        SetSize(dlg_alarms_PosX, dlg_alarms_PosY, dlg_alarms_width, dlg_alarms_height +DLG_HX);
         y =4;
         for(ix=0; ix<5; ix++)
         {
@@ -372,9 +385,11 @@ void DlgAlarms::Layout(int which_inverter)
 
     // Set form size for number of inverters configured
     if(show[0] && show[1])
-        SetSize(0, 116, 320, 219+DLG_HX);
+        // SetSize(x, y, w, h)
+        SetSize(dlg_alarms_PosX, dlg_alarms_PosY, dlg_alarms_width, (dlg_alarms_height)*2 +DLG_HX);
     else
-        SetSize(0, 116, 320, 106+DLG_HX);
+        // SetSize(x, y, w, h)
+        SetSize(dlg_alarms_PosX, dlg_alarms_PosY, dlg_alarms_width, dlg_alarms_height +DLG_HX);
 
     y = 0;
     inverter_name[0]->SetSize(wxDefaultCoord, y, wxDefaultCoord, wxDefaultCoord);
@@ -594,8 +609,17 @@ void GotInverterStatus(int inv)
     }
 }
 
-void ShowInverterStatus()
+void ShowInverterStatus(int x, int y)
 {//======================
+    // store location of parent form
+    dlg_alarms_ParentPosX = x;
+    dlg_alarms_ParentPosY = y;
+
+    // set location for dlg_alarm form
+    dlg_alarms_PosX = dlg_alarms_ParentPosX - dlg_alarms->dlg_alarms_width;
+    dlg_alarms_PosY = dlg_alarms_ParentPosY;
+    
+    // set out form
     dlg_alarms->Layout(3);
     DisplayState(0);
     DisplayState(1);

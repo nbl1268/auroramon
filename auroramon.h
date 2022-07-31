@@ -261,6 +261,12 @@ class Mainframe: public wxFrame
         void SetupStatusPanel(int control);
         void MakeInverterMenu(int control);
         wxTimer logstatus_timer;
+        
+        // Hold location of main form
+        int MainPosX = 0;
+        int MainPosY = 0;
+        int MainWidth = 0;
+        int MainHeight = 0;
 
     private:
         void OnClose(wxCloseEvent& event);
@@ -270,6 +276,7 @@ class Mainframe: public wxFrame
         void OnInverterEvent(wxCommandEvent &event);
         int DataResponse(int data_ok, INVERTER_RESPONSE *ir);
         void OnKey(wxKeyEvent& event);
+        void OnMove(wxMoveEvent& event);
         void OnStartupTimer(wxTimerEvent &event);
         void OnPulseTimer(wxTimerEvent &event);
         void OnLogStatusTimer(wxTimerEvent &event);
@@ -300,10 +307,6 @@ class Mainframe: public wxFrame
 
         DECLARE_EVENT_TABLE()
 };
-
-
-
-
 
 #define N_HIST_SCALE 12
 #define N_HISTOGRAM_PAGES 4
@@ -423,7 +426,6 @@ class GraphPanel: public wxScrolledWindow
         DECLARE_EVENT_TABLE()
 };
 
-
 // TODO Review for multiple inverters
 class DlgSetup: public wxDialog
 {//============================
@@ -472,7 +474,6 @@ class DlgLocation: public wxDialog
     DECLARE_EVENT_TABLE()
 };
 
-
 class PowerMeter: public wxFrame
 {//=============================
     public:
@@ -481,8 +482,6 @@ class PowerMeter: public wxFrame
 
     private:
 };
-
-
 
 class DlgChart: public wxDialog
 {//============================
@@ -517,7 +516,6 @@ class DlgChart: public wxDialog
     DECLARE_EVENT_TABLE()
 };
 
-
 class DlgHistogram: public wxDialog
 {//================================
     public:
@@ -534,7 +532,6 @@ class DlgHistogram: public wxDialog
 
     DECLARE_EVENT_TABLE()
 };
-
 
 class DlgInverter: public wxDialog
 {//===============================
@@ -554,7 +551,6 @@ class DlgInverter: public wxDialog
 
     DECLARE_EVENT_TABLE()
 };
-
 
 class DlgRetrieveEnergy: public wxDialog
 {//=====================================
@@ -596,7 +592,6 @@ class DlgSelectDate: public wxDialog
     DECLARE_EVENT_TABLE()
 };
 
-
 class DlgSetTime: public wxDialog
 {//==============================
     public:
@@ -623,7 +618,6 @@ class DlgSetTime: public wxDialog
 
     DECLARE_EVENT_TABLE()
 };
-
 
 #define PVO_PERIOD         0x07
 #define PVO_INSTANTANEOUS  0x10
@@ -662,7 +656,6 @@ class DlgPvoutput: public wxDialog
 
     DECLARE_EVENT_TABLE()
 };
-
 
 typedef struct {
     int dsp_code;
@@ -712,7 +705,6 @@ class DlgExtraR: public wxDialog
     DECLARE_EVENT_TABLE()
 };
 
-
 class DlgAlarms: public wxDialog
 {//==============================
     public:
@@ -724,11 +716,13 @@ class DlgAlarms: public wxDialog
         wxStaticText *label[2][5];
         wxStaticText *message[2][5];
 
+        int dlg_alarms_width = 320;
+        int dlg_alarms_height = 106;   // per inverter + DLG header eg 27
+
     private:
         void OnButton(wxCommandEvent &event);
     DECLARE_EVENT_TABLE()
 };
-
 
 class DlgCoords: public wxDialog
 {//==============================
@@ -774,7 +768,8 @@ void PruneAlarmFile(int inv);
 void UpdateDailyData(int inv, wxString fname_daily);
 
 extern void GotInverterStatus(int inv);
-extern void ShowInverterStatus();
+// extern void ShowInverterStatus();
+extern void ShowInverterStatus(int MainPosX, int MainPosY);
 
 extern int DisplayDateGraphs(const wxString date_str, int control);
 extern wxString SelectDisplayDate();

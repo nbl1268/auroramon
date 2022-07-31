@@ -80,6 +80,7 @@ BEGIN_EVENT_TABLE(Mainframe, wxFrame)
     EVT_CLOSE(Mainframe::OnClose)
     EVT_MENU(-1, Mainframe::OnCommand)
 	EVT_KEY_DOWN(Mainframe::OnKey)
+    EVT_MOVE(Mainframe::OnMove)
 	EVT_TIMER(idStartupTimer, Mainframe::OnStartupTimer)
     EVT_TIMER(idPulseTimer, Mainframe::OnPulseTimer)
     EVT_TIMER(idLogStatusTimer, Mainframe::OnLogStatusTimer)
@@ -1282,22 +1283,33 @@ void Mainframe::OnKey(wxKeyEvent &event)
     event.Skip();
 }
 
+void Mainframe::OnMove(wxMoveEvent& event)
+{//=====================================
+    // Get current position and size of main form
+    MainPosX = GetPosition().x;
+    MainPosY = GetPosition().y;
+    MainWidth = GetSize().GetWidth();
+    MainHeight = GetSize().GetHeight();
+
+    event.Skip();
+}
+
 const wxString key_info = _T(""
-"F2     \tToday's charts.\n"
-"F3     \tHistogram of daily energy totals.\n"
-"F4     \tInverter status and alarm state.\n"
-"F11    \tToggle full-screen display.\n"
-"Escape \tEnd full-screen display.\n"
-" [     \tShow the charts for the previous day.\n"
-" ]     \tShow the charts for the next day.\n"
-"\n"
-"Page Up\tDisplay the next chart page.\n"
-"Page Down\tDisplay the previous chart page.\n"
-"Home   \tDisplay the first chart page.\n"
-"End    \tDisplay the last chart page.\n"
-" <   > \tChange the x-scale.\n"
-"Up,  Down\tChange the y-scale (power graphs only).\n"
-"Left,  Right\tHorizontal scroll.");
+    "F2     \tToday's charts.\n"
+    "F3     \tHistogram of daily energy totals.\n"
+    "F4     \tInverter status and alarm state.\n"
+    "F11    \tToggle full-screen display.\n"
+    "Escape \tEnd full-screen display.\n"
+    " [     \tShow the charts for the previous day.\n"
+    " ]     \tShow the charts for the next day.\n"
+    "\n"
+    "Page Up\tDisplay the next chart page.\n"
+    "Page Down\tDisplay the previous chart page.\n"
+    "Home   \tDisplay the first chart page.\n"
+    "End    \tDisplay the last chart page.\n"
+    " <   > \tChange the x-scale.\n"
+    "Up,  Down\tChange the y-scale (power graphs only).\n"
+    "Left,  Right\tHorizontal scroll.");
 
 wxHtmlWindow *html_help = NULL;
 wxDialog *dlg_help = NULL;
@@ -1339,7 +1351,7 @@ void Mainframe::OnAbout()
     info.SetCopyright(_T("(C) 2012 Jonathan Duddington <jonsd@users.sourceforge.net>"));
     info.AddDeveloper(wxT("2012 Jonathan Duddington"));
     info.AddDeveloper(wxT("\n2022 nbl1268"));
-    info.SetLicence(_T("GNU GENERAL PUBLIC LICENSE Version 3\n\nhttp://www.gnu.org/licenses/gpl.html"));
+    info.SetLicence(_T("GNU GENERAL PUBLIC LICENSE Version 3\nhttp://www.gnu.org/licenses/gpl.html"));
     info.SetWebSite(wxT("https://github.com/nbl1268"));
 
     wxAboutBox(info);
@@ -1449,10 +1461,11 @@ void Mainframe::OnCommand(wxCommandEvent &event)
         break;
 
     case idMenuInverterState:
-        if(dlg_alarms->IsShown())
+        if (dlg_alarms->IsShown())
             dlg_alarms->Close();
         else
-            ShowInverterStatus();
+            ShowInverterStatus(this->GetPosition().x, this->GetPosition().y);
+            this->SetFocus();
         break;
 
     case idMenuInverterInfo:

@@ -22,6 +22,8 @@
 #include <wx/dcbuffer.h>
 #include "auroramon.h"
 
+#pragma region Declarations
+
 #define N_SCROLL    8   //scroll by 8 pixels
 
 wxFont Font_GraphDate(24, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD);
@@ -52,9 +54,22 @@ const double range_adjust[11] = {0.125, 0.1768, 0.25, 0.3536, 0.5, 0.7071, 1.0, 
 
 #define CLIPPING_WIDTH 8
 
+// Main form Location
+int dlgCoords_ParentPosX = 0;
+int dlgCoords_ParentPosY = 0;
 
+// form Location
+int dlgCoords_PosX = 0;
+int dlgCoords_PosY = 116;
+int dlgCoord_width = 150;   // 320;
+int dlgCoords_height = 110; // 280;   // per inverter + DLG header eg 27
+
+#pragma endregion
+
+
+// Done 31/07/2022 - positioned form bottom left of Main form
 // Done 24/07/2022 - fix form size to show information for all parameters shown on chart (max 5)
-// TODO - set form initial location to top right of parent form
+// TODO - set form initial location to bottom left of parent form
 
 
 GraphPanel::GraphPanel(wxWindow *parent, const wxPoint& pos, const wxSize &size):
@@ -104,7 +119,8 @@ void GraphPanel::SetColours(int white)
 }
 
 DlgCoords::DlgCoords(wxWindow *parent)
-    : wxDialog(parent, -1, _T("Coords"), wxPoint(0, 116), wxSize(320,280+DLG_HX))
+    // : wxDialog(parent, -1, _T("Coords"), wxPoint(0, 116), wxSize(320,280+DLG_HX))
+    : wxDialog(parent, -1, _T("Coords"), wxPoint(dlgCoords_PosX, dlgCoords_PosY), wxSize(dlgCoord_width, dlgCoords_height + DLG_HX))
 {//====================================
     int x, y;
     int ix;
@@ -140,23 +156,21 @@ void DlgCoords::ShowDlg(CHART_PAGE *chart_page, int period)
         period = prev_period;
     prev_period = period;
 
-    
-    // TODO - get exApp location and size - use to set initial location of this form
-    // wxFileConfig* pConfig = new wxFileConfig("SlideComposer");
-    int fx, fy, fw, fh;
-    GetClientSize(&fw, &fh);
-    GetSize(&fw, &fh);
-    GetPosition(&fx, &fy);
-    // Move(x, y);
-    // SetClientSize(w, h);
-
     if(IsShown() == false)
     {
+        // current form location availabe in mainframe->MainPosX and mainframe->MainPosY
+        // position dlgCoords bottom left - aligning on bottom edge
+        dlgCoords_PosX = mainframe->MainPosX - dlgCoord_width;
+        dlgCoords_PosY = mainframe->MainPosY + mainframe->MainHeight - GetSize().GetHeight();
+
 #ifdef __WXMSW__
         // 24/7/2022 - increase form height to allow for time + 5 (max) data fields
+        // SetSize (x, y, w, h)
         // SetSize(0, 116, 150, 100+DLG_HX);
-        SetSize(0, 116, 150, 110 + DLG_HX);
+        // SetSize(0, 116, 150, 110 + DLG_HX);
+        SetSize(dlgCoords_PosX, dlgCoords_PosY, dlgCoord_width, dlgCoords_height + DLG_HX);
 #else
+        // SetSize (x, y, w, h)
         SetSize(0, 116, 150, 96+DLG_HX);
 #endif
     }
@@ -288,6 +302,9 @@ void DlgCoords::ShowDlg(CHART_PAGE *chart_page, int period)
         t_value[ix]->SetLabel(wxEmptyString);
         ix++;
     }
+
+    // return focus to main form
+    mainframe->SetFocus();
 }
 
 void GraphPanel::OnMouse(wxMouseEvent& event)
@@ -614,7 +631,7 @@ int GraphPanel::OnKey2(wxKeyEvent& event)
         if(dlg_alarms->IsShown())
             dlg_alarms->Close();
         else
-            ShowInverterStatus();
+            // ShowInverterStatus();        // commented out for testing - appears to cause the dlg_alarms to re-appear when user closed that form
         break;
 
     case WXK_F11:
