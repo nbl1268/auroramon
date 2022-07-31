@@ -44,7 +44,11 @@
 
 #pragma region v1.08
  // List of changes contained in v1.08
+ // 29/07/2022
+ // - correct error with LogFileOpen
+ // 
  // 24/07/2022
+ // - Expand size of Coords form to show all (5 max) variables
  // 
  // 19/7/2022
  // - Improve Inverter status message form
@@ -84,7 +88,6 @@ BEGIN_EVENT_TABLE(Mainframe, wxFrame)
     EVT_COMMAND(idInverterModelError, wxEVT_MY_EVENT, Mainframe::OnInverterEvent)
 END_EVENT_TABLE()
 
-
 BEGIN_EVENT_TABLE(GraphPanel,wxScrolledWindow)
 	EVT_LEFT_DOWN(GraphPanel::OnMouse)
     EVT_RIGHT_DOWN(GraphPanel::OnMouse)
@@ -93,11 +96,8 @@ BEGIN_EVENT_TABLE(GraphPanel,wxScrolledWindow)
 	EVT_KEY_DOWN(GraphPanel::OnKey)
 END_EVENT_TABLE()
 
-
-
 void SendCommand(int inv, int type);
 void InitComms();
-
 
 extern void MonitorOutput(int power);
 extern int SavePvoutput(int inv);
@@ -105,7 +105,6 @@ extern void SunInfo();
 extern void InitCharts();
 extern void InitCharts2();
 extern void InitDates();
-
 
 GraphPanel *graph_panel;
 wxPanel *status_panel;
@@ -119,7 +118,6 @@ DlgRetrieveEnergy *dlg_retrieve_energy;
 DlgPvoutput *dlg_pvoutput;
 DlgSetTime *dlg_settime;
 DlgCoords *dlg_coords;
-
 
 Mainframe *mainframe;
 int display_today = 0;
@@ -140,7 +138,7 @@ int option_date_format;
 
 #pragma endregion
 
-
+#pragma region PowerMeter-type
 PowerMeter::PowerMeter(wxWindow *parent)
     : wxFrame(parent, -1, _T("Power Meter"), wxPoint(0, 100), wxSize(330,280+DLG_HX), wxCAPTION | wxSTAY_ON_TOP)
 {
@@ -152,7 +150,9 @@ PowerMeter::~PowerMeter()
 }
 
 PowerMeter *power_meter;
+#pragma endregion
 
+#pragma region MiscFunctions
 
 int GetGmtOffset(time_t timeval)
 {//=============================
@@ -178,7 +178,6 @@ int GetGmtOffset(time_t timeval)
     return(timespan.GetSeconds().ToLong());
 }
 
-
 int GetFileLength(const char *filename)
 {//====================================
 	struct stat statbuf;
@@ -191,8 +190,6 @@ int GetFileLength(const char *filename)
 
 	return(statbuf.st_size);
 }  // end of GetFileLength
-
-
 
 void LogMessage(wxString message, int control)
 {//===========================================
@@ -218,7 +215,6 @@ void LogMessage(wxString message, int control)
     mainframe->logstatus_timer.Start(300*1000, wxTIMER_ONE_SHOT);   // 5 minute timer to remove message from the status bar
 }
 
-
 void DisplayTextfile(wxString fname, wxString caption)
 {//===================================================
     static wxDialog *textframe = NULL;
@@ -241,32 +237,7 @@ void DisplayTextfile(wxString fname, wxString caption)
     textframe->Show(true);
 }
 
-
-static int prev_period_5min = -1;
-
-void CheckEnergyLog()
-{//==================
-    // On program start, find the last 5 minute period in the energy log
-    FILE *f;
-    wxString fname;
-    int hours, minutes;
-    int value;
-    char buf[80];
-
-    fname.Printf(_T("%s/e5min_%s.txt"), data_year_dir2.c_str(), date_ymd_string.c_str());
-    if((f = fopen(fname.mb_str(wxConvLocal), "r")) == NULL)
-        return;
-
-    while(fgets(buf, sizeof(buf), f) != NULL)
-    {
-        if(sscanf(buf, "%d:%d, %d", &hours, &minutes, &value) == 3)
-        {
-            prev_period_5min = (hours*60+minutes)/5;
-        }
-    }
-    fclose(f);
-}
-
+#pragma endregion
 
 #define MAX_PVOUTPUT_BATCH  30
 void ResendPvoutput(int timeval)
@@ -380,6 +351,32 @@ void ResendPvoutput(int timeval)
     }
 }
 
+#pragma region LogFiles
+
+static int prev_period_5min = -1;
+
+void CheckEnergyLog()
+{//==================
+    // On program start, find the last 5 minute period in the energy log
+    FILE* f;
+    wxString fname;
+    int hours, minutes;
+    int value;
+    char buf[80];
+
+    fname.Printf(_T("%s/e5min_%s.txt"), data_year_dir2.c_str(), date_ymd_string.c_str());
+    if ((f = fopen(fname.mb_str(wxConvLocal), "r")) == NULL)
+        return;
+
+    while (fgets(buf, sizeof(buf), f) != NULL)
+    {
+        if (sscanf(buf, "%d:%d, %d", &hours, &minutes, &value) == 3)
+        {
+            prev_period_5min = (hours * 60 + minutes) / 5;
+        }
+    }
+    fclose(f);
+}
 
 void LogEnergy(int seconds, const char *ymd)
 {//=========================================
@@ -550,7 +547,6 @@ void LogEnergy(int seconds, const char *ymd)
     }
 }
 
-
 void LogColumnHeaders(int inverter, int control)
 {//=============================================
 // control: 1= only if the header has changed
@@ -589,7 +585,6 @@ void LogColumnHeaders(int inverter, int control)
     inverters[inverter].logheaders_changed = 0;
 }
 
-
 void MakeDate(wxDateTime &date, wxString ymd)
 {//==========================================
     long year, month, day;
@@ -599,7 +594,6 @@ void MakeDate(wxDateTime &date, wxString ymd)
     ymd.Right(2).ToLong(&day);
     date.Set(day, wxDateTime::Month(month-1), year);
 }
-
 
 wxString MakeDateString(wxString ymd)
 {//==================================
@@ -614,7 +608,6 @@ wxString MakeDateString(wxString ymd)
         option_date_format = 0;
     return(date.Format(fmt[option_date_format]));
 }
-
 
 void OpenLogFiles(int create, int control)
 {//=======================================
@@ -739,7 +732,9 @@ void OpenLogFiles(int create, int control)
     display_today = 1;
 }  // end of OpenLogFiles
 
+#pragma endregion
 
+#pragma region InverterInfo
 
 int CounterString(char *string, int inv, int counter)
 {//==================================================
@@ -769,7 +764,6 @@ int CounterString(char *string, int inv, int counter)
     sprintf(string, "%s\t%s%9.2f hrs\n", counter_name[counter], padding, (double)duration/3600);
     return(strlen(string));
 }
-
 
 void GotInverterInfo(int inv, int ok)
 {//==================================
@@ -815,13 +809,14 @@ void GotInverterInfo(int inv, int ok)
             sprintf(p, "\nInverter-computer time difference: %4d seconds", inverters[inv].time_offset);
         }
 
-
         wxMessageBox(wxString(data, wxConvLocal), wxString::Format(_T("Inverter address %d") + noresponse, inverter_address[inv]), wxOK, mainframe);
         free(data);
     }
 }  // end of GotInverterInfo
 
+#pragma endregion
 
+#pragma region Mainframe
 
 void Mainframe::ShowEnergy(int inv)
 {//================================
@@ -851,7 +846,6 @@ void Mainframe::ShowEnergy(int inv)
         txt_energy[inv][ix]->WriteText(wxString::Format(format, e[ix]));
     }
 }
-
 
 int Mainframe::DataResponse(int data_ok, INVERTER_RESPONSE *ir)
 {//============================================================
@@ -906,7 +900,7 @@ int Mainframe::DataResponse(int data_ok, INVERTER_RESPONSE *ir)
         if(ir->flags & IR_HAS_TIME)
         {
             // inverters[inv].time_offset has been set
-//wxLogStatus(wxString::Format(_T("time offset %d"), inverters[inv].time_offset));
+            //wxLogStatus(wxString::Format(_T("time offset %d"), inverters[inv].time_offset));
         }
 
         if((ir->flags & IR_HAS_PEAK) && (strcmp(ymd, inverters[inv].today_done) == 0))
@@ -933,7 +927,7 @@ int Mainframe::DataResponse(int data_ok, INVERTER_RESPONSE *ir)
             if(first_energy)
             {
                 first_energy = 0;
-LogCommMsg(wxString::Format(_T("Program start: Energy %7.3f  %8.3f %8.3f %9.3f %10.3f %9.3f"), etot[0],etot[1],etot[2],etot[3],etot[4],etot[5]));
+                LogCommMsg(wxString::Format(_T("Program start: Energy %7.3f  %8.3f %8.3f %9.3f %10.3f %9.3f"), etot[0],etot[1],etot[2],etot[3],etot[4],etot[5]));
             }
 
             if((strcmp(ymd, iv->today_done) != 0) && (ir->pw[0] > 0))
@@ -1281,19 +1275,12 @@ LogCommMsg(wxString::Format(_T("Program start: Energy %7.3f  %8.3f %8.3f %9.3f %
     return(period_type);
 }  // end of DataResponse
 
-
-
-
-
 void Mainframe::OnKey(wxKeyEvent &event)
 {//=====================================
     if(graph_panel->OnKey2(event) >= 0)
         return;
     event.Skip();
 }
-
-
-
 
 const wxString key_info = _T(""
 "F2     \tToday's charts.\n"
@@ -1311,7 +1298,6 @@ const wxString key_info = _T(""
 " <   > \tChange the x-scale.\n"
 "Up,  Down\tChange the y-scale (power graphs only).\n"
 "Left,  Right\tHorizontal scroll.");
-
 
 wxHtmlWindow *html_help = NULL;
 wxDialog *dlg_help = NULL;
@@ -1343,8 +1329,21 @@ void Mainframe::ShowHelp()
     dlg_help->Show(true);
 }
 
+void Mainframe::OnAbout()
+{
+    // https://docs.wxwidgets.org/3.0/classwx_about_dialog_info.html
+    wxAboutDialogInfo info;
+    info.SetName(_("Aurora Monitor"));
+    info.SetVersion(_("1.08"));
+    info.SetDescription(_("Receives and displays data from up to 2 Aurora power inverters.\n"));
+    info.SetCopyright(_T("(C) 2012 Jonathan Duddington <jonsd@users.sourceforge.net>"));
+    info.AddDeveloper(wxT("2012 Jonathan Duddington"));
+    info.AddDeveloper(wxT("\n2022 nbl1268"));
+    info.SetLicence(_T("GNU GENERAL PUBLIC LICENSE Version 3\n\nhttp://www.gnu.org/licenses/gpl.html"));
+    info.SetWebSite(wxT("https://github.com/nbl1268"));
 
-
+    wxAboutBox(info);
+}
 
 void Mainframe::OnCommand(wxCommandEvent &event)
 {//=============================================
@@ -1514,7 +1513,6 @@ void Mainframe::OnCommand(wxCommandEvent &event)
     }
 }
 
-
 wxMenuBar *mbar;
 
 void Mainframe::MakeInverterMenu(int control)
@@ -1555,7 +1553,6 @@ void Mainframe::MakeInverterMenu(int control)
 
     mbar->Insert(2, invMenu, _T("&Inverter"));
 }
-
 
 void Mainframe::MakeMenus()
 {//========================
@@ -1635,7 +1632,6 @@ void Mainframe::MakeMenus()
 
     SetMenuBar(mbar);
 }
-
 
 Mainframe::Mainframe(wxFrame *frame, const wxString& title)
     : wxFrame(frame, -1, title, wxDefaultPosition, wxSize(1024,768), wxDEFAULT_FRAME_STYLE)
@@ -1733,18 +1729,4 @@ void Mainframe::OnClose(wxCloseEvent& WXUNUSED(event))
     Destroy();
 }
 
-void Mainframe::OnAbout()
-{
-    // https://docs.wxwidgets.org/3.0/classwx_about_dialog_info.html
-    wxAboutDialogInfo info;
-    info.SetName(_("Aurora Monitor"));
-    info.SetVersion(_("1.08"));
-    info.SetDescription(_("Receives and displays data from up to 2 Aurora power inverters.\n"));
-    info.SetCopyright(_T("(C) 2012 Jonathan Duddington <jonsd@users.sourceforge.net>"));
-    info.AddDeveloper(wxT("2012 Jonathan Duddington"));
-    info.AddDeveloper(wxT("\n2022 nbl1268"));
-    info.SetLicence(_T("GNU GENERAL PUBLIC LICENSE Version 3\n\nhttp://www.gnu.org/licenses/gpl.html"));
-    info.SetWebSite(wxT("https://github.com/nbl1268"));
-
-    wxAboutBox(info);
-}
+#pragma endregion
