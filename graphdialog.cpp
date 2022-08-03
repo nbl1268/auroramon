@@ -457,7 +457,8 @@ void DlgExtraR::ShowDlg()
 //        if(extra_readings[ix].type == 0)
 //            t_graph[ix]->SetValue(true);   // preset 'graph' by default
     }
-    SetSize(200, 150, wxDefaultCoord, wxDefaultCoord, wxSIZE_USE_EXISTING);
+    // SetSize(200, 150, wxDefaultCoord, wxDefaultCoord, wxSIZE_USE_EXISTING);
+    SetSize(mainframe->MainPosX + 10, mainframe->MainPosY + 10, wxDefaultCoord, wxDefaultCoord, wxSIZE_USE_EXISTING);
     ShowModal();
 }
 
@@ -733,10 +734,11 @@ DlgChart::DlgChart(wxWindow *parent)
     StyleNames.Add(_T("thick2"));
 
     StatusNames.Clear();
-    StatusNames.Add(_T("all"));
-    StatusNames.Add(_T("some"));
+    StatusNames.Add(_T("all (h)"));
+    StatusNames.Add(_T("all (v)"));
     StatusNames.Add(_T("inv A"));
     StatusNames.Add(_T("inv B"));
+    StatusNames.Add(_T("some"));
 
     memset(gfields, 0, sizeof(gfields));
 
@@ -791,6 +793,10 @@ void DlgChart::ShowDlg()
 {//=====================
     memcpy(chart_pages_copy, chart_pages, sizeof(chart_pages_copy));
     ShowPage(graph_panel->page);
+    
+    // move dialog to adjacent to mainframe
+    Move(mainframe->MainPosX + 10, mainframe->MainPosY + 10);
+
     Show();
 }
 

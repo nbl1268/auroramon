@@ -26,11 +26,9 @@
  // Planned changes (29 May 2022)
  // - Error Handling
  // - capture in log and handle so program continues rather than crashing out
-  // - Improve Inverter status message form
+ // 
+ // - Improve Inverter status message form
  //   - fix so it can be hidden if needed (press F4 seems to hide it - need to check with live data)
- // - Move 'extra fields' below the respective inverter data
- //
- // - check why extra field in status panel for RISO isnt showing for both inverters
  // 
  // Create Windows Installer Package (update to existing installer... CMake??)
  //
@@ -44,6 +42,16 @@
 
 #pragma region v1.08
  // List of changes contained in v1.08
+ // 03/08/2022
+ // Added new sytle 'All (v)' to allow inverter data in status panel to be 'stacked' vertically
+ // Added PlaceReadings instuction to show extra readings fields for second inverter
+ //
+ // 02/08/2022
+ //  - positioned each of the settings sub forms insert top left of Main form
+ // 
+ // 31/07/2022
+ //  - positioned dlgCoords form bottom left of Main form
+ //  - positioned dlg_alarm (eg Inverter Status) form top left of Main form
  // 29/07/2022
  // - correct error with LogFileOpen
  // 
@@ -52,7 +60,7 @@
  // 
  // 19/7/2022
  // - Improve Inverter status message form
- //   - expanded inverter status panel field size (height) when there are two inverters configured 
+ // - expanded inverter status panel field size (height) when there are two inverters configured 
 
 #pragma endregion
 
@@ -80,7 +88,8 @@ BEGIN_EVENT_TABLE(Mainframe, wxFrame)
     EVT_CLOSE(Mainframe::OnClose)
     EVT_MENU(-1, Mainframe::OnCommand)
 	EVT_KEY_DOWN(Mainframe::OnKey)
-    EVT_MOVE(Mainframe::OnMove)
+    // EVT_MOVE(Mainframe::OnMove)
+    EVT_MOVE_END(Mainframe::OnMove)
 	EVT_TIMER(idStartupTimer, Mainframe::OnStartupTimer)
     EVT_TIMER(idPulseTimer, Mainframe::OnPulseTimer)
     EVT_TIMER(idLogStatusTimer, Mainframe::OnLogStatusTimer)
@@ -1283,14 +1292,13 @@ void Mainframe::OnKey(wxKeyEvent &event)
     event.Skip();
 }
 
-void Mainframe::OnMove(wxMoveEvent& event)
+void Mainframe::OnMove(wxMoveEvent &event)
 {//=====================================
-    // Get current position and size of main form
-    MainPosX = GetPosition().x;
-    MainPosY = GetPosition().y;
-    MainWidth = GetSize().GetWidth();
-    MainHeight = GetSize().GetHeight();
-
+    // Get current position and size of main form once move has stopped.
+    mainframe->MainPosX = GetPosition().x;
+    mainframe->MainPosY = GetPosition().y;
+    mainframe->MainWidth = GetSize().GetWidth();
+    mainframe->MainHeight = GetSize().GetHeight();
     event.Skip();
 }
 
@@ -1647,7 +1655,8 @@ void Mainframe::MakeMenus()
 }
 
 Mainframe::Mainframe(wxFrame *frame, const wxString& title)
-    : wxFrame(frame, -1, title, wxDefaultPosition, wxSize(1024,768), wxDEFAULT_FRAME_STYLE)
+    // : wxFrame(frame, -1, title, wxDefaultPosition, wxSize(1024,768), wxDEFAULT_FRAME_STYLE)
+    : wxFrame(frame, -1, title, wxDefaultPosition, wxSize(1058, 768), wxDEFAULT_FRAME_STYLE)
 {//========================================================
     int inv;
 
@@ -1659,12 +1668,9 @@ Mainframe::Mainframe(wxFrame *frame, const wxString& title)
     pulsetimer.SetOwner(this->GetEventHandler(), idPulseTimer);
     logstatus_timer.SetOwner(this->GetEventHandler(), idLogStatusTimer);
 
-    // setup size of the status_panel
-    // TODO make it relative to number of inverters configured
-    // the wxSize(x,y) controls the size of the status panel - need to check number of inverters then set accordingly
-    // status_panel = new wxPanel(this, -1, wxDefaultPosition, wxSize(100, 52), wxSUNKEN_BORDER);
-    // if(inverter_address[1] == 0) {}
-    status_panel = new wxPanel(this, -1, wxDefaultPosition, wxSize(100, 52), wxSUNKEN_BORDER);
+    // Default size of the status_panel for single inverter
+    // status_panel = new wxPanel(this, -1, wxDefaultPosition, wxSize(100, 52), wxSUNKEN_BORDER);  // Single Row - Single Inverter
+    status_panel = new wxPanel(this, -1, wxDefaultPosition, wxSize(100, 104), wxSUNKEN_BORDER); // Double Row - Dual Inverters
 
     graph_panel = new GraphPanel(this, wxDefaultPosition, wxSize(100,100));
     wxBoxSizer *frame_sizer = new wxBoxSizer(wxVERTICAL);
@@ -1708,6 +1714,12 @@ Mainframe::Mainframe(wxFrame *frame, const wxString& title)
     InitCharts();
     InitCharts2();
     SetupStatusPanel(1);   // call this after InitCharts()
+
+    // Get current position and size of main form once move has stopped.
+    mainframe->MainPosX = GetPosition().x;
+    mainframe->MainPosY = GetPosition().y;
+    mainframe->MainWidth = GetSize().GetWidth();
+    mainframe->MainHeight = GetSize().GetHeight();
 
     InitComms();
     CheckEnergyLog();

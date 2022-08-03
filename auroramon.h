@@ -276,13 +276,13 @@ class Mainframe: public wxFrame
         void OnInverterEvent(wxCommandEvent &event);
         int DataResponse(int data_ok, INVERTER_RESPONSE *ir);
         void OnKey(wxKeyEvent& event);
-        void OnMove(wxMoveEvent& event);
+        void OnMove(wxMoveEvent &event);
         void OnStartupTimer(wxTimerEvent &event);
         void OnPulseTimer(wxTimerEvent &event);
         void OnLogStatusTimer(wxTimerEvent &event);
         void MakeMenus();
         void MakeStatusPanel();
-        void PlaceReadings(int type, int inv, int x, bool show);
+        void PlaceReadings(int type, int inv, int x, int y, bool show);
         void ShowEnergy(int inverter);
         void ShowHelp();
 

@@ -51,9 +51,9 @@ DlgSetup::DlgSetup(wxWindow *parent)
     t_serialport = new wxTextCtrl(this, dlgSerialPort, serial_port, wxPoint(x, y), wxSize(200, 20));
     new wxStaticText(this, -1, _T("Serial port"), wxPoint(8, y+2));
     y = 62;
-    t_inverter1 = new wxTextCtrl(this, dlgInverter1, wxString::Format(_T("%d"), inverter_address[0]), wxPoint(x+20,y), wxSize(40, 20));
-    t_inverter2 = new wxTextCtrl(this, dlgInverter2, wxString::Format(_T("%d"), inverter_address[1]), wxPoint(x+60,y), wxSize(40, 20));
-    new wxStaticText(this, -1, _T("Inverter addresses"), wxPoint(8, y+2));
+    t_inverter1 = new wxTextCtrl(this, dlgInverter1, wxString::Format(_T("%d"), inverter_address[0]), wxPoint(x+90,y), wxSize(40, 20));
+    t_inverter2 = new wxTextCtrl(this, dlgInverter2, wxString::Format(_T("%d"), inverter_address[1]), wxPoint(x+130,y), wxSize(40, 20));
+    new wxStaticText(this, -1, _T("Inverter addresses (0 if not used)"), wxPoint(8, y+2));
     y = 96;
     new wxStaticText(this, -1, _T("Data directory"), wxPoint(8, y));
     t_data_dir = new wxTextCtrl(this, dlgDataDir, data_dir, wxPoint(6, y+16), wxSize(306, 20));
@@ -70,6 +70,9 @@ DlgSetup::DlgSetup(wxWindow *parent)
 
 void DlgSetup::ShowDlg()
 {//=====================
+    // move dialog to adjacent to mainframe
+    Move(mainframe->MainPosX + 10, mainframe->MainPosY + 10);
+
     t_serialport->ChangeValue(serial_port);
 
     if(inverter_address[0] > 0)
@@ -228,6 +231,9 @@ DlgLocation::DlgLocation(wxWindow *parent)
 
 void DlgLocation::ShowDlg()
 {//=====================
+    // move dialog to adjacent to mainframe
+    Move(mainframe->MainPosX + 10, mainframe->MainPosY + 10);
+
     int ix;
 
     t_longitude->ChangeValue(degrees_to_string(Longitude));
@@ -329,6 +335,9 @@ DlgInverter::DlgInverter(wxWindow *parent)
 
 void DlgInverter::ShowDlg(int inv)
 {//===============================
+    // move dialog to adjacent to mainframe
+    Move(mainframe->MainPosX + 10, mainframe->MainPosY + 10);
+
     inverter = inv;
     t_retrieve->SetValue(inverters[inv].auto_retrieve);
     ShowModal();
@@ -385,10 +394,12 @@ DlgHistogram::DlgHistogram(wxWindow *parent)
 
 void DlgHistogram::ShowDlg()
 {//=========================
+    // move dialog to adjacent to mainframe
+    Move(mainframe->MainPosX + 10, mainframe->MainPosY + 10);
 
-     t_dailymax->ChangeValue(wxString::Format(_T("%4.1f"), histogram_max));
-     t_back_colour->SetSelection(histogram_flags);
-     ShowModal();
+    t_dailymax->ChangeValue(wxString::Format(_T("%4.1f"), histogram_max));
+    t_back_colour->SetSelection(histogram_flags);
+    ShowModal();
 }
 
 void DlgHistogram::OnButton(wxCommandEvent &event)
@@ -449,6 +460,9 @@ DlgRetrieveEnergy::DlgRetrieveEnergy(wxWindow *parent)
 
 void DlgRetrieveEnergy::ShowDlg(int inv, int type)
 {//===============================================
+    // move dialog to adjacent to mainframe
+    Move(mainframe->MainPosX + 10, mainframe->MainPosY + 10);
+
     wxString fname;
     wxString path;
     int addr;
@@ -581,6 +595,9 @@ DlgPvoutput::DlgPvoutput(wxWindow *parent)
 
 void DlgPvoutput::ShowDlg()
 {//========================
+    // move dialog to adjacent to mainframe
+    Move(mainframe->MainPosX + 10, mainframe->MainPosY + 10);
+
     t_url->ChangeValue(pvoutput.url);
     t_system_id->ChangeValue(pvoutput.sid);
     t_api_key->ChangeValue(pvoutput.key);
@@ -705,6 +722,8 @@ void DlgSetTime::UpdateData()
 
 void DlgSetTime::ShowDlg(int inv)
 {//==============================
+    // move dialog to adjacent to mainframe
+    Move(mainframe->MainPosX + 10, mainframe->MainPosY + 10);
 
     inverter = inv;
     UpdateData();
