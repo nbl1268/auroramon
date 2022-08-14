@@ -42,6 +42,10 @@
 
 #pragma region v1.08
  // List of changes contained in v1.08
+ // 09/08/2022
+ // fixed bug in QueueCommand() where inv parameter was missing from LogMessage resulting in an 'ArgType' error when Inverter 'Retrieve Daily Energy' and 'Retrieve 10sec Energy' requests were made
+ // expanded logging to capture details for Communicat::Transmission_state_error message
+ // 
  // 03/08/2022
  // Added new sytle 'All (v)' to allow inverter data in status panel to be 'stacked' vertically
  // Added PlaceReadings instuction to show extra readings fields for second inverter

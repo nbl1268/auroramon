@@ -37,6 +37,7 @@
 #include "auroramon.h"
 
 
+#pragma region Declarations
 #define STATE_OK   0
 
 #define opGetDSP   59
@@ -63,7 +64,7 @@ static int comms_inverter = 0;
 
 #define N_SERIALBUF 11
 static char SerialBuf[N_SERIALBUF];
-static const char *SerialBufSpaces = "          ";   // fill SerialBuf with 10 speaces and /0
+static const char *SerialBufSpaces = "          ";   // fill SerialBuf with 10 spaces and /0
 
 int command_inverter = 0;
 int command_type = 0;
@@ -102,7 +103,10 @@ static int CE_today_ix = 0;
 static int CE_verbose = 0;
 static unsigned short *CE_data = NULL;
 
+#pragma endregion
 
+// Done 09/08/2022 - fixed bug in QueueCommand() where inv parameter was missing from LogMessage resulting in an 'ArgType' error when Inverter 'Retrieve Daily Energy' and 'Retrieve 10sec Energy' requests were made
+// Done 09/08/2022 - expanded logging to capture details for Communicat::Transmission_state_error message
 
 void LogCommMsg(wxString string)
 {//==============================
@@ -111,7 +115,7 @@ void LogCommMsg(wxString string)
     struct tm *btime;
     time_t current_time;
 
-//return;
+    //return;
 
     if((inverters[comms_inverter].alive == 0) && (inverters[comms_inverter].fails > 3))
         return;
@@ -146,9 +150,7 @@ InverterThread::InverterThread(void)
     type = 0;
 }
 
-
 InverterThread *inverter_thread;
-
 
 
 int QueueCommand(int inv, int type)
@@ -167,15 +169,14 @@ int QueueCommand(int inv, int type)
     if(message != wxEmptyString)
     {
         if(inverter_address[1] != 0)
-            LogMessage(wxString::Format(_T("Inverter %d: %s"), message.c_str()), 1);
+            LogMessage(wxString::Format(_T("Inverter %d: %s"), inv, message.c_str()), 1);
+
         else
             LogMessage(message, 1);
     }
 
     return(0);
 }
-
-
 
 
 #ifdef __WXMSW__
@@ -458,6 +459,7 @@ unsigned short crc16(char *data_p, unsigned short length)
 }
 
 
+
 int ReadNextChar(char *out, int timeout)
 {//=====================================
 
@@ -482,7 +484,6 @@ int ReadNextChar(char *out, int timeout)
 #endif
     return(n_read);
 }
-
 
 int ReadToBuffer(char *out, int n_chars)
 {//=====================================
@@ -514,11 +515,10 @@ int ReadToBuffer(char *out, int n_chars)
 
     if(retry > 1)
     {
-LogCommMsg(wxString::Format(_T("   Wait %d"), retry));
+        LogCommMsg(wxString::Format(_T("   Wait %d"), retry));
     }
     return(ix);  // OK
 }
-
 
 int Communicate(int check_state)
 {//=============================
@@ -531,8 +531,9 @@ int Communicate(int check_state)
     int max_attempts;
     int attempts;
     char SerialBufSave[N_SERIALBUF];
+    int ix;
 
-//wxStartTimer();
+    //wxStartTimer();
 
     memcpy(SerialBufSave, SerialBuf, N_SERIALBUF);
 
@@ -587,7 +588,7 @@ int Communicate(int check_state)
 
         if(nchars != 10)
         {
-LogCommMsg(wxString::Format(_T("%d  Only written %d chars"), attempts, nchars));
+            LogCommMsg(wxString::Format(_T("%d  Only written %d chars"), attempts, nchars));
             if(nchars <= 0)
                 continue;   // we havent sent anything, so no point in looking for a reply
         }
@@ -602,7 +603,7 @@ LogCommMsg(wxString::Format(_T("%d  Only written %d chars"), attempts, nchars));
             if(((unsigned char)SerialBuf[6] != (crcValue & 0xff)) || ((unsigned char)SerialBuf[7] != ((crcValue >> 8) & 0xff)))
             {
                 // crc error
-LogCommMsg(wxString::Format(_T("%d  CRC error, nchars %d opcode %2d %2d"), attempts, result, SerialBufSave[1], SerialBufSave[2]));
+                LogCommMsg(wxString::Format(_T("%d  CRC error, nchars %d opcode %2d %2d"), attempts, result, SerialBufSave[1], SerialBufSave[2]));
             }
             else
             {
@@ -613,34 +614,45 @@ LogCommMsg(wxString::Format(_T("%d  CRC error, nchars %d opcode %2d %2d"), attem
         if(result == 0)
         {
             inverter_thread->Sleep(100);  // thread sleep
-if(attempts >= max_attempts)
-LogCommMsg(wxString::Format(_T("%d  Wait %d timeout - fail"), attempts, max_read_attempts+1));
-else
-LogCommMsg(wxString::Format(_T("%d  Wait %d timeout, retry"), attempts, max_read_attempts+1));
+            if(attempts >= max_attempts)
+                LogCommMsg(wxString::Format(_T("%d  Wait %d timeout - fail"), attempts, max_read_attempts+1));
+            else
+                LogCommMsg(wxString::Format(_T("%d  Wait %d timeout, retry"), attempts, max_read_attempts+1));
         }
         else
         {
             // failed to read from serial device
-LogCommMsg(wxString::Format(_T("%d  ReadToBuffer %d chars"), attempts, result));
+            LogCommMsg(wxString::Format(_T("%d  ReadToBuffer %d chars"), attempts, result));
         }
     }
-
 
     if(crc_ok == 0)
     {
         if(result > 0)
         {
-LogCommMsg(_T("CRC error, failed\n"));
+            LogCommMsg(_T("CRC error, failed\n"));
         }
         result = -1;
     }
+
     if((check_state==1) && (SerialBuf[0] != STATE_OK))
     {
         transmission_state_error = SerialBuf[0];
         if(transmission_state_error != 0x20)
         {
             // 0x20 is the space character we put into SerialBuf[0], unchanged
-LogCommMsg(wxString::Format(_T("Transmission state error %d  buf[0]=%d cmd=%d\n"), transmission_state_error, SerialBuf[0], SerialBufSave[1]));
+            LogMessage(wxString::Format(_T("----")), 1);
+            LogMessage(wxString::Format(_T("Transmission state error %d  buf[0]=%d cmd=%d"), transmission_state_error, SerialBuf[0], SerialBufSave[1]),1);
+            LogCommMsg(wxString::Format(_T("Transmission state error %d  buf[0]=%d cmd=%d\n"), transmission_state_error, SerialBuf[0], SerialBufSave[1]));
+            
+            // list out the buffer contents here
+            for (ix = 0;  SerialBuf[ix] !=0; ix++)
+            {
+                LogMessage(wxString::Format(_T("Transmission state error - buffer content buf[%d]=%d"), ix, SerialBuf[ix]),1);
+                LogCommMsg(wxString::Format(_T("Transmission state error - buffer content buf[%d]=%d\n"), ix, SerialBuf[ix]));
+            }
+            LogMessage(wxString::Format(_T("Transmission state error - End")), 1);
+            LogMessage(wxString::Format(_T("----")), 1);
         }
         result = -2;
     }
@@ -650,11 +662,11 @@ LogCommMsg(wxString::Format(_T("Transmission state error %d  buf[0]=%d cmd=%d\n"
     }
     else
     {
-//LogCommMsg(wxString::Format(_T("OK   opcode %2d %2d  result %.2x %.2x %.2x %.2x %.2x %.2x"), SerialBufSave[1], SerialBufSave[2],
-//                             SerialBuf[0], SerialBuf[1], SerialBuf[2]&0xff, SerialBuf[3]&0xff, SerialBuf[4]&0xff, SerialBuf[5]&0xff));
+        //LogCommMsg(wxString::Format(_T("OK   opcode %2d %2d  result %.2x %.2x %.2x %.2x %.2x %.2x"), SerialBufSave[1], SerialBufSave[2],
+        //                             SerialBuf[0], SerialBuf[1], SerialBuf[2]&0xff, SerialBuf[3]&0xff, SerialBuf[4]&0xff, SerialBuf[5]&0xff));
     }
 
-//LogCommMsg(wxString::Format(_T("  time %d"), wxGetElapsedTime()));
+    //LogCommMsg(wxString::Format(_T("  time %d"), wxGetElapsedTime()));
     return(result);
 }
 
@@ -683,7 +695,6 @@ unsigned long ConvertLong(char *buf)
     return(*p & 0xffffffff);
 }
 
-
 unsigned short ConvertShort(char *buf)
 {//=================================
     unsigned short *p;
@@ -703,8 +714,6 @@ unsigned short ConvertShort(char *buf)
     p = (unsigned short *)buf2;
     return(*p);
 }
-
-
 
 float ConvertFloat(char *buf)
 {//==========================
@@ -747,7 +756,6 @@ int GetCEdata(int addr, int param)
     return(ConvertLong(&SerialBuf[2]));
 }
 
-
 float GetDSPdata(int addr, int param)
 {//==================================
     float value;
@@ -767,7 +775,6 @@ float GetDSPdata(int addr, int param)
     value = ConvertFloat(&SerialBuf[2]);
     return(value);
 }
-
 
 typedef struct {
    int  value;
@@ -799,22 +806,22 @@ MODEL_TABLE model_names[] = {
 {'M', 0.5320955, "PVI-CENTRAL-250"},
 {'O', 0.1004004, "PVI-3600-OUTD"},
 {'P', 0.1617742, "3-PHASE-INTERFACE"},
-{'T', 0.5320955, "PVI-12.5-I-OUTD"},  // scale ?
-{'U', 0.5320955, "PVI-12.5-I-OUTD"},  // scale ?
-{'V', 0.5320955, "PVI-12.5-I-OUTD"},  // scale ?
+{'T', 0.5320955, "PVI-12.5-I-OUTD"},  // scale ? (output 480 VAC)
+{'U', 0.5320955, "PVI-12.5-I-OUTD"},  // scale ? (output 208 VAC)
+{'V', 0.5320955, "PVI-12.5-I-OUTD"},  // scale ? (output 380 VAC)
 {'X', 0.5320955, "PVI-10.0-OUTD"},
-{'Y', 0.5320955, "PVI-TRIO-30-OUTD"},  // scale ?
-{'Z', 0.5320955, "PVI-12.5-I-OUTD"},  // scale ?
+{'Y', 0.5320955, "PVI-TRIO-30-OUTD"}, // scale ?
+{'Z', 0.5320955, "PVI-12.5-I-OUTD"},  // scale ? (output 600 VAC)
 {'g', -1,        "UNO-2.0-I"},
 {'h', -1,        "PVI-3.8-I"},
 {'i', 0.0557842, "PVI-2000"},
 {'o', 0.0557842, "PVI-2000-OUTD"},
-{'t', 0.5320955, "PVI-10.0-I-OUTD"},  // scale ?
-{'u', 0.5320955, "PVI-10.0-I-OUTD"},  // scale ?
-{'v', 0.5320955, "PVI-10.0-I-OUTD"},  // scale ?
-{'w', 0.5320955, "PVI-10.0-I-OUTD"},  // scale ?
+{'t', 0.5320955, "PVI-10.0-I-OUTD"},  // scale ? (output 480 VAC)
+{'u', 0.5320955, "PVI-10.0-I-OUTD"},  // scale ? (output 208 VAC)
+{'v', 0.5320955, "PVI-10.0-I-OUTD"},  // scale ? (output 380 VAC)
+{'w', 0.5320955, "PVI-10.0-I-OUTD"},  // scale ? (output 480 VAC current limit 12 A)
 {'y', 0.5320955, "PVI-TRIO-20-OUTD"}, // scale ?
-{'z', 0.5320955, "PVI-10.0-I-OUTD"},  // scale ?
+{'z', 0.5320955, "PVI-10.0-I-OUTD"},  // scale ? (output 600 VAC)
 {-1, -1, NULL}
 };
 
@@ -837,16 +844,15 @@ NAME_TABLE standard_names[] = {
 {'U', "UK G83"},
 {'W', "DE BDEW"},
 
-{'a', "US UL1741"},
-{'b', "US UL1741"},
-{'c', "US UL1741"},
+{'a', "US UL1741 Vout = 208 single phase"},
+{'b', "US UL1741 Vout = 240 single phase"},
+{'c', "US UL1741 Vout = 277 single phase"},
 {'e', "   VDE AR-N-4105"},
 {'k', "IL Isreal - Derived from AS"},
 {'o', "   Corsica"},
 {'u', "UK G59"},
 {-1, NULL}
 };
-
 
 const char *LookupName(NAME_TABLE *t, int value)
 {//=============================================
@@ -869,6 +875,7 @@ MODEL_TABLE *LookupModel(MODEL_TABLE *t, int value)
     }
     return(NULL);
 }
+
 
 time_t GetInverterTime(int addr, time_t *timeval, int *timediff)
 {//=============================================================
@@ -910,7 +917,6 @@ int ResetPartial(int inv)
     if(Communicate(1) <= 0) return(-1);
     return(0);
 }
-
 
 int GetInverterInfo(int inv)
 {//=========================
@@ -985,13 +991,17 @@ int GetInverterInfo(int inv)
     strncpy(part_number, SerialBuf, 6);
     part_number[6] = 0;
 
-
     strcpy(SerialBuf, SerialBufSpaces);
     SerialBuf[0] = addr;
     SerialBuf[1] = 58;  // inverter version
     SerialBuf[2] = 0;
     if(Communicate(1) <= 0) return(-1);
 
+    // Log Inverter Details
+    // LogMessage(wxString::Format(_T("Inverter %d: %s"), message.c_str()), 1);
+    // LogCommMsg(wxString::Format(_T("Transmission state error %d  buf[0]=%d cmd=%d\n"), transmission_state_error, SerialBuf[0], SerialBufSave[1]));
+
+    LogCommMsg(wxString::Format(_T("Part Number SerialBuf[2]=%d\n"), SerialBuf[2]));
     pm = LookupModel(model_names, SerialBuf[2] & 0xff);
     if(pm == NULL)
     {
@@ -1002,6 +1012,7 @@ int GetInverterInfo(int inv)
         strcpy(model_name_buf, pm->name);
     }
 
+    LogCommMsg(wxString::Format(_T("Look Up Name SerialBuf[3]=%d\n"), SerialBuf[3]));
     ps = LookupName(standard_names, SerialBuf[3] & 0xff);
     if(ps == NULL)
     {
@@ -1021,6 +1032,7 @@ int GetInverterInfo(int inv)
     switch(SerialBuf[4])
     {
         case 'T': pt = "Transformer"; break;
+        case 't': pt = "Transformer HF"; break;
         case 'N': pt = "Transformerless"; break;
         default:  pt = unknown;
     }
@@ -1059,7 +1071,6 @@ int GetInverterInfo(int inv)
     return(0);
 }
 
-
 int GetState(int addr)
 {//===================
     strcpy(SerialBuf, SerialBufSpaces);
@@ -1071,15 +1082,13 @@ int GetState(int addr)
     return(0);
 }
 
-
-
 int SetInverterTime(int addr, int offset)
 {//========================================
     time_t computer_time;
     time_t inverter_time;
     int diff;
 
-LogCommMsg(_T("Get time"));
+    LogCommMsg(_T("Get time"));
     computer_time = time(NULL);
 
     inverter_time = computer_time + offset - (time_t)TimeBase;
@@ -1096,22 +1105,19 @@ LogCommMsg(_T("Get time"));
     SerialBuf[5] = inverter_time;
     SerialBuf[6] = 0;
 
-LogCommMsg(_T("Set time"));
+    LogCommMsg(_T("Set time"));
     if(Communicate(1) <= 0)
     {
-LogCommMsg(_T("set time failed"));
+    LogCommMsg(_T("set time failed"));
         GetInverterTime(addr, NULL, NULL);
         return(-1);
     }
-LogCommMsg(_T("set time done"));
+    LogCommMsg(_T("set time done"));
 
     GetInverterTime(addr, NULL, &diff);
-LogCommMsg(wxString::Format(_T("difference is now %d"), diff));
+    LogCommMsg(wxString::Format(_T("difference is now %d"), diff));
     return(0);
 }
-
-
-
 
 int GetAllDsp(int addr)
 {//====================
@@ -1150,7 +1156,6 @@ int GetAllDsp(int addr)
     return(0);
 }
 
-
 int GetPowerIn(int addr)
 {//=====================
     float p;
@@ -1184,7 +1189,6 @@ int GetPowerIn(int addr)
     return(0);
 }
 
-
 int GetEnergy(int addr)
 {//====================
     int value;
@@ -1215,8 +1219,6 @@ int GetEnergy(int addr)
 
     return(0);
 }
-
-
 
 
 void Energy10Sec_Finish()
@@ -1321,8 +1323,6 @@ void Energy10Sec_Finish()
         fclose(f_10sec);
 }
 
-
-
 int Energy10Sec_Continue(int n)
 {//============================
     int count;
@@ -1364,7 +1364,6 @@ int Energy10Sec_Continue(int n)
     }
     return(0);
 }
-
 
 int Energy10Sec_Start(int inv)
 {//===========================
@@ -1518,8 +1517,6 @@ void EnergyDaily_Finish()
     }
 }
 
-
-
 int EnergyDaily_Continue()
 {//=======================
     int count;
@@ -1563,7 +1560,6 @@ int EnergyDaily_Continue()
     }
     return(0);
 }
-
 
 int EnergyDaily_Start(int inv)
 {//===========================
@@ -1751,8 +1747,6 @@ int GetInverterData(int inv, int type)
 }
 
 
-
-
 void UpdatePowerData2(const char *fname, char *periods, float *powers)
 {//===================================================================
 // Append retrieved power data to a data file
@@ -1809,7 +1803,6 @@ void UpdatePowerData2(const char *fname, char *periods, float *powers)
 
     fclose(f_out);
 }
-
 
 void UpdatePowerData(wxString fname10sec)
 {//======================================
@@ -2065,8 +2058,9 @@ void SendCommand(int inv, int type)
 
     command_type = type;
     command_inverter = inv;
-//return;  // TESTING
-//wxLogStatus(wxString::Format(_T("SendCommand %d  %d  live=%d"), inv, type, inverters[0].alive));
+    //return;  // TESTING
+    wxLogStatus(wxString::Format(_T("SendCommand %d  %d  live=%d"), inv, type, inverters[0].alive));
+    // LogMessage(wxString::Format(_T("SendCommand %d  %d  live=%d"), inv, type, inverters[0].alive), 1);
     if((serial_port_error != 0) && (serial_port[0] != 0))
     {
         if(serial_port_error == -1)
@@ -2093,8 +2087,6 @@ void SendCommand(int inv, int type)
     }
 
 }
-
-
 
 void *InverterThread::Entry()
 {//==========================

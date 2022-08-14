@@ -768,7 +768,6 @@ void PruneAlarmFile(int inv);
 void UpdateDailyData(int inv, wxString fname_daily);
 
 extern void GotInverterStatus(int inv);
-// extern void ShowInverterStatus();
 extern void ShowInverterStatus(int MainPosX, int MainPosY);
 
 extern int DisplayDateGraphs(const wxString date_str, int control);
