@@ -29,6 +29,7 @@
  // 
  // - Improve Inverter status message form
  //   - fix so it can be hidden if needed (press F4 seems to hide it - need to check with live data)
+ //   - 17/08 designed behavior, form shows if inverter has an alarm, eg Input Low on either (or both) channels...
  // 
  // Create Windows Installer Package (update to existing installer... CMake??)
  //
@@ -42,6 +43,10 @@
 
 #pragma region v1.08
  // List of changes contained in v1.08
+ // 17/08/2022
+ // forced position of dlg_alarm (eg Inverter Status) form to be top left of Main form (including when opened due to alarm state active)
+ // revised trigger for display inverter status, removed channel alerts so only triggered by inverter alarms
+ // 
  // 09/08/2022
  // fixed bug in QueueCommand() where inv parameter was missing from LogMessage resulting in an 'ArgType' error when Inverter 'Retrieve Daily Energy' and 'Retrieve 10sec Energy' requests were made
  // expanded logging to capture details for Communicat::Transmission_state_error message
@@ -1476,7 +1481,7 @@ void Mainframe::OnCommand(wxCommandEvent &event)
         if (dlg_alarms->IsShown())
             dlg_alarms->Close();
         else
-            ShowInverterStatus(this->GetPosition().x, this->GetPosition().y);
+            ShowInverterStatus();
             this->SetFocus();
         break;
 

@@ -300,10 +300,6 @@ DlgAlarms *dlg_alarms = NULL;
 
 static const wxString labels[5] = {_T("Global state"), _T("Inverter state"), _T("Chnl 1 DC/DC"), _T("Chnl 2 DC/DC"), _T("Alarm state")};
 
-// Main form Location
-int dlg_alarms_ParentPosX = 0;
-int dlg_alarms_ParentPosY = 0;
-
 // form Location
 int dlg_alarms_PosX = 0;
 int dlg_alarms_PosY = 116;
@@ -313,6 +309,8 @@ int dlg_alarms_PosY = 116;
 #pragma endregion
 
 
+// Done 17/08/2022 - revised trigger for display inverter status, removed channel alerts so only triggered by inverter alarms
+// Done 17/08/2022 - forced position of form to be top left of Main form (including when opened due to alarm state active)
 // Done 31/07/2022 - positioned form top left of Main form
 // Done 19/07/2022 - fixed form size to show information for multiple inverters
 // FUTURE add scrollbar to support more then 2 inverters
@@ -530,8 +528,10 @@ void GotInverterStatus(int inv)
     else
         prev_state = 1;
 
-    if((ir->state[0] == GLOBAL_STATE_RUN) && (ir->state[1] == INVERTER_STATE_RUN) && (alarm == 0) &&
-        ((ir->state[2] == 2) || (ir->state[2] == 3)) && ((ir->state[3] == 2) || (ir->state[3] == 3)))
+    // NOTE Checks for Channel 1 and Channel 2 to be either 'MPPT' or 'not used'... anything else forces alarm state...
+    /*if((ir->state[0] == GLOBAL_STATE_RUN) && (ir->state[1] == INVERTER_STATE_RUN) && (alarm == 0) &&
+        ((ir->state[2] == 2) || (ir->state[2] == 3)) && ((ir->state[3] == 2) || (ir->state[3] == 3)))*/
+    if ((ir->state[0] == GLOBAL_STATE_RUN) && (ir->state[1] == INVERTER_STATE_RUN) && (alarm == 0))
     {
         inverters[inv].alarm = 0;
     }
@@ -601,6 +601,11 @@ void GotInverterStatus(int inv)
         {
             wxBell();  // previously there was no alarm
         }
+
+        // set location for dlg_alarm form
+        dlg_alarms_PosX = mainframe->MainPosX - dlg_alarms->dlg_alarms_width;
+        dlg_alarms_PosY = mainframe->MainPosY;
+
         dlg_alarms->Layout(1 << inv);
         DisplayState(inv);
         dlg_alarms->Show(true);
@@ -609,15 +614,11 @@ void GotInverterStatus(int inv)
     }
 }
 
-void ShowInverterStatus(int x, int y)
+void ShowInverterStatus()
 {//======================
-    // store location of parent form
-    dlg_alarms_ParentPosX = x;
-    dlg_alarms_ParentPosY = y;
-
     // set location for dlg_alarm form
-    dlg_alarms_PosX = dlg_alarms_ParentPosX - dlg_alarms->dlg_alarms_width;
-    dlg_alarms_PosY = dlg_alarms_ParentPosY;
+    dlg_alarms_PosX = mainframe->MainPosX - dlg_alarms->dlg_alarms_width;
+    dlg_alarms_PosY = mainframe->MainPosY;
     
     // set out form
     dlg_alarms->Layout(3);

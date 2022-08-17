@@ -2059,7 +2059,7 @@ void SendCommand(int inv, int type)
     command_type = type;
     command_inverter = inv;
     //return;  // TESTING
-    wxLogStatus(wxString::Format(_T("SendCommand %d  %d  live=%d"), inv, type, inverters[0].alive));
+    // wxLogStatus(wxString::Format(_T("SendCommand %d  %d  live=%d"), inv, type, inverters[0].alive));
     // LogMessage(wxString::Format(_T("SendCommand %d  %d  live=%d"), inv, type, inverters[0].alive), 1);
     if((serial_port_error != 0) && (serial_port[0] != 0))
     {
